@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Lutece - AdminSql">
+	<body>
+		<links>
+			<item name="EN" href="../index.html" />
+		</links>
+
+		<menu name="Aper&ccedil;u">
+			<item name="Introduction" href="index.html" />
+			<item name="T&eacute;l&eacute;chargement" href="download.html" />
+			<item name="Configuration" href="configuration.html" />
+			<item name="Utilisation" href="/user/admin-plugin.html" collapse="true">
+                <item name="D&eacute;finition d'une base de donn&eacute;es" href="/user/admin-databases.html"/>
+                <item name="Utilit&eacute; de la base de donn&eacute;es" href="/user/admin-utility.html"/>
+				<item name="Gestion des tables d'une base" href="/user/admin-manage-tables.html"/>
+				<item name="Requêtes personnelles" href="/user/admin-personnal-request.html"/>
+                <item name="Dump d'une base de donn&eacute;es" href="/user/admin-dump-database.html"/>
+			</item>
+		</menu>
+
+		<menu name="T&eacute;l&eacute;chargements" inherit="bottom" >
+			     <item name="Versions stables" href="../../../stable_builds/plugins/plugin-adminsql/"/>
+			     <item name="Nightly builds" href="../../../nightly_builds/plugins/plugin-adminsql/" />
+		</menu>
+
+		<menu ref="reports" />
+
+	</body>
+</project>

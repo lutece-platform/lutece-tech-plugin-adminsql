@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<plug-in>
+    <name>adminsql</name>
+    <class>fr.paris.lutece.portal.service.plugin.PluginDefaultImplementation</class>
+    <version>2.0.0</version>
+    <description>adminsql.plugin.description</description>
+    <provider>adminsql.plugin.provider</provider>
+    <provider-url>http://lutece.paris.fr</provider-url>
+    <icon-url>images/admin/skin/plugins/adminsql/adminsql.png</icon-url>
+    <copyright>Copyright (c) 2001-2009 Mairie de Paris</copyright>
+	<core-version-dependency>
+		<min-core-version></min-core-version>
+		<max-core-version></max-core-version>	
+	</core-version-dependency>
+
+    <!-- Le plugin requiert-il un pool de connexions paramétrable : 1 - oui, 0 - non -->
+    <db-pool-required>1</db-pool-required>
+
+    <!-- Listes des fonctionnalitées d'administration éventuellement introduites par le plugin-->
+    <admin-features>
+        <admin-feature>
+            <feature-id>ADMIN_SQL_MANAGEMENT</feature-id>
+            <feature-title>adminsql.adminFeature.adminsql_management.name</feature-title>
+            <feature-description>adminsql.adminFeature.adminsql_management.description</feature-description>
+            <feature-level>1</feature-level>
+            <feature-url>jsp/admin/plugins/adminsql/ManageDatabases.jsp</feature-url>
+        </admin-feature>
+    </admin-features>
+
+    <!--  Specific plugin CSS stylesheet   --> 
+    <css-stylesheets>
+          <css-stylesheet>adminsql/adminsql.css</css-stylesheet> 
+    </css-stylesheets>
+</plug-in>

@@ -1,0 +1,51 @@
+<div class="content-box" >
+
+    <h2>#i18n{adminsql.manage_data.pageTitle}${table.tableName}</h2>
+    
+     <table>
+        <tbody>
+            <tr>
+                <#list field_list as field>
+                <#if field.idKeyValue==1>
+                    <th>
+                        ${field.fieldName}
+                    </th>
+                 <#else>
+                    <th>
+                        <u>${field.fieldName}</u>
+                    </th>
+                 </#if >   
+                </#list>
+                <th>
+                    #i18n{adminsql.manage_data.columnTitleAction}
+                </th>
+            </tr>
+            
+                <#list data_list as row>
+                <tr>
+                    <#assign row_to_modify = "toto">
+                    <#list row as data>
+                        <#if data_has_next>
+                        <td>
+                            ${data}
+                        </td>
+                        <#else>
+                            <#assign row_to_modify = data>
+                        </#if>
+                    </#list>
+                    <td>
+                        <a href="jsp/admin/plugins/adminsql/ModifyData.jsp?pool_name=${pool_name}&table_name=${table.tableName}${row_to_modify}"<img src="images/admin/skin/actions/modify.png" alt="#i18n{adminsql.manage_data.ModifyData}" /> </a>
+                        <a href="jsp/admin/plugins/adminsql/DeleteData.jsp?pool_name=${pool_name}&table_name=${table.tableName}${row_to_modify}"<img src="images/admin/skin/actions/delete.png" alt="#i18n{adminsql.manage_data.DeleteData}" /> </a>
+                    </td>
+                 </tr>
+                </#list>
+            </tbody>
+        </table>
+    <form method="get" action="jsp/admin/plugins/adminsql/CreateData.jsp">
+        <input value="${pool_name}" name="pool_name" type="hidden" />
+        <input type="hidden" id="table_name" name="table_name" value="${table.tableName}"/>
+        <p>
+            <input value="#i18n{adminsql.manage_create.buttonValueCreateData}" class="button" type="submit">
+        </p>
+    </form>
+</div>

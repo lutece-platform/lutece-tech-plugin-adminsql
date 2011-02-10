@@ -1,0 +1,51 @@
+<div class="content-box" >
+    
+    <h2>#i18n{adminsql.result_of_user_request.pageTitle}${pool_name}</h2>
+    <label style="text-align:left" for="">#i18n{adminsql.user_request.result_request} :</label><br>
+    <br>
+    <p>
+        <pre>${user_request}</pre>
+    </p>
+    <br>
+    <table>
+        <tbody>
+            <tr>
+                <#list list_fields_names as field_name>
+                    <th>
+                        ${field_name}
+                    </th>
+                </#list> 
+                <#list data_list as row>
+                    <tr>
+                        <#list row as data>
+                            <td>
+                                ${data}
+                            </td>
+                        </#list>
+                    </tr>
+                </#list>
+        </tbody>
+    </table>
+    <table>
+        <tbody>
+            <tr>
+                <td style="border:none;" width="2%">
+                    <form method="post" action="jsp/admin/plugins/adminsql/UserRequest.jsp">
+                        <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}"/>
+                        <p>
+                            <input value="#i18n{adminsql.result_user_request.another_request_button}" class="button" type="submit">
+                        </p>
+                    </form>
+                </td>
+                <td style="border:none;">
+                    <form method="post" action="jsp/admin/plugins/adminsql/ManageTables.jsp">
+                        <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}"/>
+                        <p>
+                            <input value="#i18n{adminsql.result_user_request.manage_tables_button}" class="button" type="submit">
+                        </p>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

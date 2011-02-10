@@ -1,0 +1,17 @@
+<div class="content-box" >
+    
+    <h2>#i18n{adminsql.parameter_to_export.pageTitle}</h2>
+
+    <form action="jsp/admin/plugins/adminsql/DoExportDatabase.jsp" method="post" name="">
+           <input type="hidden" name="pool_name" value="${pool_name}" />
+        <legend><input type='checkbox' name='checkbox_database' checked="checked" value='on'><strong>#i18n{adminsql.parameter_to_export.choose_database}</strong></legend>
+        <br/>
+           <legend><input type='checkbox' name='checkbox_structure' checked="checked" value='on'><strong>#i18n{adminsql.parameter_to_export.choose_structure}</strong></legend>
+       <br/>
+           <legend><input type='checkbox' name='checkbox_data' checked="checked" value='on'><strong>#i18n{adminsql.parameter_to_export.choose_data}</strong></legend>
+    <br/>
+    <br/>
+        <input type="submit" value="#i18n{adminsql.exportdatabase.do_export}" class="button" />
+    </form>
+    
+</div>

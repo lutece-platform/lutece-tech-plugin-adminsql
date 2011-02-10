@@ -1,0 +1,71 @@
+<div class="content-box" >
+    
+   
+    
+    <h2>#i18n{adminsql.manage_fields_structure.pageTitle}${table.tableName}</h2>
+    
+    <table>
+        <tbody>
+            <tr>
+                <th>#i18n{adminsql.manage_fields_structure.columnField}</th>
+                <th>#i18n{adminsql.manage_fields_structure.columnType}</th>
+                <th>#i18n{adminsql.manage_fields_structure.columnNull}</th>
+                <th>#i18n{adminsql.manage_fields_structure.columnKey}</th>
+                <th>#i18n{adminsql.manage_fields_structure.columnDefault}</th>
+                <th>#i18n{adminsql.manage_fields_structure.columnActions}</th>
+            </tr>
+            <#if field_list?has_content>
+                    <#list field_list as field>
+                        <tr>
+                            <td>
+                                ${field.fieldName}
+                            </td>
+                            <td>
+                                ${field.typeValue}
+                            </td>
+                            <td>
+                                ${field.labelNullValue}
+                            </td>
+                            <td>
+                                ${field.labelKeyValue}
+                            </td>
+                            <td>
+                                ${field.defaultValue}
+                            </td>
+                            
+                            <td>                      
+                                <a alt="#i18n{adminsql.manage_fields_structure.linkTitleModifyFieldStructure}"  title="#i18n{adminsql.manage_fields_structure.linkTitleModifyFieldStructure}" href="jsp/admin/plugins/adminsql/ModifyFieldStructure.jsp?pool_name=${pool_name}&table_name=${table.tableName}&field_name=${field.fieldName}"><img src="images/admin/skin/plugins/adminsql/table_edit.png" alt="#i18n{adminsql.manage_data.linkTitleDataTable}" /> </a>
+                                <#if (field_list?size>1)>
+                                <a alt="#i18n{adminsql.manage_fields_structure.linkDeleteField}"  title="#i18n{adminsql.manage_fields_structure.linkDeleteField}" href="jsp/admin/plugins/adminsql/DeleteFieldStructure.jsp?pool_name=${pool_name}&table_name=${table.tableName}&field_name=${field.fieldName}"><img src="images/admin/skin/actions/delete.png" alt="#i18n{adminsql.manage_data.linkTitleStructureTable}" /> </a>
+                              </#if>
+                            </td>
+                       </tr>  
+                 </#list>
+            </#if>   
+        </tbody>
+    </table>
+    <br/>
+    <form method="post" action="jsp/admin/plugins/adminsql/CreateFieldStructure.jsp">
+         
+        <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}"/>
+        <input type="hidden" id="table_name" name="table_name" value="${table.tableName}"/>
+        
+        <h3>#i18n{adminsql.manage_fields_structure.CreateFields}</h3>
+        
+        <input type="radio" name="place_of_new_field" value=1 id="end_of_table" tabindex="40" checked="checked" /> #i18n{adminsql.manage_fields_structure.CreateFields.EndOfTable} <br />
+        <br />
+        <input type="radio" name="place_of_new_field" value=2 id="beginnig_of_table" tabindex="50" /> #i18n{adminsql.manage_fields_structure.CreateFields.BeginnigOfTable} <br />
+        <br />
+        <input type="radio" name="place_of_new_field" value=3 id="after_a_field" tabindex="60" /> #i18n{adminsql.manage_fields_structure.CreateFields.AfterAField}
+        &nbsp;
+        <select id="choose_fields" name="choose_fields" >
+            <#list field_list as item>	
+                <option value="${item.fieldName}" >${item.fieldName}</option>
+            </#list>		
+	</select>
+        <br />
+        <p>
+          <input value="#i18n{adminsql.manage_fields_structure.buttonValueCreateField}" class="button" type="submit">
+        </p>
+     </form>
+</div>

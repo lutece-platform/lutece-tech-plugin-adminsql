@@ -1,0 +1,26 @@
+<div class="content-box" >
+    
+<form method="post"  name="create_data" action="jsp/admin/plugins/adminsql/DoCreateData.jsp">
+    <h2>#i18n{adminsql.create_data.pageTitle}${table.tableName}</h2>
+    
+     <table>
+        <tbody>
+            <#list field_list as field>
+                <p>
+                    <label for="">${field.fieldName}</label>
+                    &nbsp;
+                    <input type="text" id="${field.fieldName}" name="${field.fieldName}" size="50" value="" maxlength="50" tabindex="1" />
+                </p>
+            </#list>
+        </tbody>
+     </table>
+     <p>   
+        <input type="submit" value="#i18n{adminsql.create_data.buttonValidate}" class="button" tabindex="3" />
+        <input class="button" type="button" onclick="javascript:history.go(-1)" value="#i18n{portal.admin.message.buttonCancel}" />
+        <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}"/>
+        <input type="hidden" id="table_name" name="table_name" value="${table.tableName}"/>
+    </p>
+</form>
+    
+</div>
+

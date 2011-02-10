@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>
+           Gestion des tables de la base
+        </title>
+    </properties>
+    <body>
+		<section name="Gestion des tables de la base">
+			<p>
+                Une fois arrivée sur la page de gestion des tables, vous voyez l'ensemble des tables contenues
+                dans la base de données. Vous pouvez modifier le nom d'une table, accéder à la gestion des champs
+                et accéder à la gestion des données d'une table. Vous pouvez également créer une table dans la base
+                de données.
+            </p>
+        </section>
+   </body>
+</document>

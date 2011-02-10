@@ -1,0 +1,48 @@
+<div class="content-box" >
+     
+    <h2>#i18n{adminsql.modify_field_structure.pageTitle}${field.fieldName}&nbsp;#i18n{adminsql.modify_field_structure_tableName.pageTitle}${table.tableName}</h2>
+    
+    <form action="jsp/admin/plugins/adminsql/DoModifyFieldStructure.jsp" method="post" name="">
+
+         <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}"/>
+        <input type="hidden" id="table_name" name="table_name" value="${table.tableName}"/>
+        
+        <p>
+            <label for="">#i18n{adminsql.modify_field_structure.columnField} </label>
+            &nbsp;
+            <input type="text" id="fieldName" name="field_name" size="50" value="${field.fieldName}" maxlength="50" tabindex="1" />
+            <input type="hidden" id="fieldToModify" name="fieldToModify" value="${field.fieldName}"/>
+        </p>
+        <p>
+            <label for="">#i18n{adminsql.modify_field_structure.columnType} </label>
+            &nbsp;
+            <@combo name="field_type_id" default_value="${field.idFieldType}" items=field_type_list/>
+            &nbsp;
+            <input type="text" id="field_length_type" name="field_length_type" size="20" value="${field.lengthTypeValue}" maxlength="20" tabindex="1" />
+        </p>
+        <p>
+            <label for="">#i18n{adminsql.modify_field_structure.columnNull} </label>
+            &nbsp;
+        <@combo name="field_null_id" default_value="${field.idFieldNull}" items=field_null_list/>
+        </p>
+        <p>
+            <label for="">#i18n{adminsql.modify_field_structure.columnKey} </label>
+            &nbsp;
+            <@combo name="field_key_id" default_value="${field.idKeyValue}" items=field_key_list/>
+            <input type="hidden" id="idOldFieldKey" name="idOldFieldKey" value="${field.idKeyValue}"/>
+        </p>
+        <#if ( field.idFieldNull=1 && field.idFieldKey=1)>
+        <p>
+            <label for="">#i18n{adminsql.modify_field_structure.columnDefault} </label>
+            &nbsp;
+            <input type="text" id="field_default_value" name="field_default_value" size="50" value="${field.defaultValue}" maxlength="50" tabindex="1" />
+        </p>
+        </#if>
+        
+        <input type="submit" value="#i18n{adminsql.modify_field_structure.savefieldstructure}" class="button" />
+        
+        <input type="button" name="undo" value="Annuler" class="button" onclick="javascript:history.go(-1)" />
+    
+    </form>
+    
+</div>    

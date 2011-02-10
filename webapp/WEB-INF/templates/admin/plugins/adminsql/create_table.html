@@ -1,0 +1,67 @@
+<div class="content-box" >
+    
+    <h2>#i18n{adminsql.create_table.pageTitle}&nbsp;${pool_name}</h2>
+    
+    <form method="post" action="jsp/admin/plugins/adminsql/DoCreateTable.jsp">
+        
+        <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}"/>
+        
+        
+        <p>
+            <label for="">#i18n{adminsql.create_table.tableName} </label>
+            &nbsp;
+            <input type="text" id="table_name" name="table_name" size="50" value="" maxlength="50" tabindex="1" />
+        </p>
+        
+        <p>
+            <label for="">#i18n{adminsql.create_table.tableComment} </label>
+            &nbsp;
+            <textarea name="table_comment" rows="6" cols="70"> </textarea> 
+        </p>
+
+        <h2>#i18n{adminsql.create_table.create_first_field}</h2>
+        
+        <p>
+            <label for="">#i18n{adminsql.modify_field_structure.columnField} </label>
+            &nbsp;
+            <input type="text" id="fieldName" name="field_name" size="50" value="" maxlength="50" tabindex="1" />
+        </p>
+        
+        <p>
+            <label for="">#i18n{adminsql.modify_field_structure.columnType} </label>
+            &nbsp;
+            <@combo name="field_type_id" default_value="" items=field_type_list/>
+            &nbsp;
+            <input type="text" id="field_length_type" name="field_length_type" size="20" value=""  maxlength="20" tabindex="2" />
+        </p>
+        
+        <p>
+            <label for="">#i18n{adminsql.modify_field_structure.columnNull} </label>
+            &nbsp;
+            #i18n{adminsql.create_table.columnNull}
+        </p>
+        
+        <p>
+            <label for="">#i18n{adminsql.modify_field_structure.columnKey} </label>
+            &nbsp;
+            <@combo name="field_key_id" default_value="" items=field_key_list/>
+        </p>
+        
+        <p>
+            <label for="">#i18n{adminsql.modify_field_structure.columnDefault} </label>
+            &nbsp;
+            <input type="text" id="field_default_value" name="field_default_value" size="50" value="" maxlength="50" tabindex="3" />
+        </p>
+       <br />
+       <br />
+       
+       #i18n{adminsql.create_table.explicationNull}<br/> 
+       <br />
+       <br />
+       
+        <input type="submit" value="#i18n{adminsql.modify_field_structure.savefieldstructure}" class="button" />
+        
+        <input type="button" name="undo" value="Annuler" class="button" onclick="javascript:history.go(-1)" />
+    </form>
+    
+</div>    

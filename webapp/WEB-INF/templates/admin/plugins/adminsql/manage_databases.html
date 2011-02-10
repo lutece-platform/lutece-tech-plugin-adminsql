@@ -1,0 +1,16 @@
+<div class="content-box" >
+
+    <h2>#i18n{adminsql.manage_databases.pageTitle}</h2>
+    
+     <table>
+        <tbody>
+            <#list pool_list as pool>
+            <tr>
+                <td>
+                     <a alt="#i18n{adminsql.manage_databases.linkTitleManageFonctionnalitiesList}"  title="#i18n{adminsql.manage_databases.linkTitleManageFonctionnalitiesList}" href="jsp/admin/plugins/adminsql/ManageFonctionnalitiesList.jsp?pool_name=${pool.code}" class="bullet-link">${pool.name}</a>
+                 </td>
+            </tr>
+            </#list>
+        </tbody>
+    </table>
+</div>

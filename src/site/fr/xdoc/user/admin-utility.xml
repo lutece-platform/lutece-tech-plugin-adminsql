@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>
+           Definition d'une base de données
+        </title>
+    </properties>
+    <body>
+        <section name="Utilité d'une base de donnees">
+            <p>
+                Une base de données permet de mettre des données à la disposition d'utilisateurs pour une consultation, une saisie ou
+                bien une mise à jour, tout en s'assurant des droits accordés à ces derniers. Cela est d'autant plus utile que les données
+                informatiques sont de plus en plus nombreuses.
+                Une base de données peut être locale, c'est-à-dire utilisable sur une machine par un utilisateur, ou bien répartie, c'est-à-dire que les informations sont stockées sur des machines distantes et accessibles par réseau.
+                L'avantage majeur de l'utilisation de bases de données est la possibilité de pouvoir être accédées par plusieurs
+                utilisateurs simultanément.
+            </p>
+        </section>
+    </body>
+</document>

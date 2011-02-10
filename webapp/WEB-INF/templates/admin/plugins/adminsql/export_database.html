@@ -1,0 +1,30 @@
+<div class="content-box" >
+    
+    
+    <form action="jsp/admin/plugins/adminsql/DoExportDatabaseff.jsp" method="post" name="">
+        
+        <p>
+            <label for="">#i18n{adminsql.export_database.identifiant} </label>
+            &nbsp;
+            <input type="text" id="identifiant" name="identifiant" size="50" value="" maxlength="50" tabindex="1" />
+        </p>
+        
+        <br>
+        
+        <p>
+            <label for="">#i18n{adminsql.export_database.password} </label>
+            &nbsp;
+            <input type="password" id="password" name="password" size="50" value="" maxlength="50" tabindex="1" />
+        </p> 
+        
+        <input type="submit" value="#i18n{adminsql.exportdatabase.do_export}" class="button" />
+        
+        <input type="button" name="undo" value="Annuler" class="button" onclick="javascript:history.go(-1)" />
+        
+        <input type="hidden" name="db_type_name" value="${db_type_name}" />
+        
+        <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}" />
+        
+    </form>
+    
+</div>    

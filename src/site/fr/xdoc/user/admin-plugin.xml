@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>
+            Menu principal du plugin AdminSql
+        </title>
+    </properties>
+    <body>
+        <section name="Plugin AdminSql">
+             <p>
+            	 Le menu principal récapitule les fonctionnalités nécessaires à la gestion des bases de données.
+            </p>
+            <ul>
+                 <li>Définition d'une base de données</li>
+                 <li>Utilité de la base de données</li>
+                 <li>Gestion des tables d'une base</li>
+                 <li>Requêtes personnelles</li>
+                 <li>Dump d'une base de données</li>
+             </ul>
+           </section>
+   </body>
+</document>

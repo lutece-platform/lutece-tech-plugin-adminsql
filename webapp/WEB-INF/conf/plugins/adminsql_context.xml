@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+    
+   <!-- package adminsql -->
+<bean id="tableDAO"  class="fr.paris.lutece.plugins.adminsql.business.TableDAO" /> 
+<bean id="fieldDAO"  class="fr.paris.lutece.plugins.adminsql.business.FieldDAO" />
+<bean id="dataDAO"   class="fr.paris.lutece.plugins.adminsql.business.DataDAO"  />
+
+</beans>
