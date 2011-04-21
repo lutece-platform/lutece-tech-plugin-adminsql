@@ -26,10 +26,4 @@
         </admin-feature>
     </admin-features>
 
-    <!-- Specific plugin CSS stylesheet -->
-    <css-stylesheets>
-        <css-stylesheets-scope>xpage</css-stylesheets-scope>
-        <css-stylesheet>adminsql/adminsql.css</css-stylesheet>
-    </css-stylesheets>
-
 </plug-in>
