@@ -34,8 +34,8 @@
 
 	<properties>
 		<componentName>adminsql</componentName>
-		<jiraProjectName>LUTECE</jiraProjectName>
-		<jiraComponentId>10033</jiraComponentId>
+		<jiraProjectName>ADMINSQL</jiraProjectName>
+		<jiraComponentId>10143</jiraComponentId>
 	</properties>
     <scm>
         <connection>scm:svn:http://dev.lutece.paris.fr/svn/lutece/portal/trunk/plugins/technical/plugin-adminsql</connection>
