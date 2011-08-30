@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document>
 	<properties>
-		<title>Plugin AdminSql</title>
+		<title>Plugin adminsql</title>
 	</properties>
 	<body>
-		<section name="Descriptif du plugin">
-			<subsection name="Plugin AdminSql">
-				<p>
-					Le plugin AdminSql va vous aider dans la gestion de vos bases de données en offrant une interface
-                    simple d'utilisation qui vous guidera dans la maintenance des bases de données de vos sites internet.
-				</p>
+		<section name="Plugin adminsql">
+			<subsection name="Introduction">
+				Le plugin AdminSql permet la gestion de
+				bases de données en offrant une interface simple d'utilisation qui
+				vousguidera dans la maintenance des bases de données de vos sites
+				internet.
 			</subsection>
 		</section>
 	</body>
