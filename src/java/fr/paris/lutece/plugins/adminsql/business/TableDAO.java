@@ -67,7 +67,7 @@ public class TableDAO implements ITableDAO
     private static final String USER = "-u";
     private static final String PASSWORD = "-p";
 
-    //Requêtes
+    //RequÃªtes
     private static final String SQL_QUERY_SELECTALL_FIELD_TYPE = " SELECT id_field_type, label_field_type FROM adminsql_field_type";
     private static final String SQL_QUERY_SELECTALL_FIELD_KEY = "SELECT id_field_key, label_field_key FROM adminsql_field_key";
     private static final String SQL_QUERY_SELECTALL_FIELD_NULL = "SELECT id_field_null, label_field_null FROM adminsql_field_null";
