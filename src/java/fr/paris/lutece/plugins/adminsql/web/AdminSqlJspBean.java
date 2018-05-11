@@ -313,7 +313,7 @@ public class AdminSqlJspBean extends PluginAdminPageJspBean
                 }
                 catch ( AppException e )
                 {
-                    String strErrorMessage = e.getInitialException(  ).getMessage(  );
+                    String strErrorMessage = ( e.getCause(  ) != null ) ? e.getCause(  ).getMessage(  ) : "";
                     Map<String, Object> model = new HashMap<String, Object>(  );
                     model.put( MARK_POOL_NAME, strPoolName );
                     model.put( MARK_APPEXCEPTION_ERROR, strErrorMessage );
@@ -335,7 +335,7 @@ public class AdminSqlJspBean extends PluginAdminPageJspBean
             }
             catch ( AppException e )
             {
-                String strErrorMessage = e.getInitialException(  ).getMessage(  );
+                String strErrorMessage = ( e.getCause(  ) != null ) ? e.getCause(  ).getMessage(  ) : "";
                 Map<String, Object> model = new HashMap<String, Object>(  );
                 model.put( MARK_POOL_NAME, strPoolName );
                 model.put( MARK_APPEXCEPTION_ERROR, strErrorMessage );
@@ -651,7 +651,7 @@ public class AdminSqlJspBean extends PluginAdminPageJspBean
             url.addParameter( PARAMETER_POOL_NAME, strPoolName );
             url.addParameter( PARAMETER_TABLE_NAME, strTableName );
 
-            Object[] messageArgs = { e.getInitialException(  ).getMessage(  ) };
+            Object[] messageArgs = { ( e.getCause(  ) != null ) ? e.getCause(  ).getMessage(  ) : "" };
 
             return AdminMessageService.getMessageUrl( request, MESSAGE_SQL_ERROR_IN_QUERY, messageArgs, url.getUrl(  ),
                 AdminMessage.TYPE_STOP );
@@ -876,7 +876,7 @@ public class AdminSqlJspBean extends PluginAdminPageJspBean
             url.addParameter( PARAMETER_PLACE_OF_FIELD, strPlaceOfField );
             url.addParameter( PARAMETER_AFTER_THE_FIELD, strAfterTheField );
 
-            Object[] messageArgs = { e.getInitialException(  ).getMessage(  ) };
+            Object[] messageArgs = { ( e.getCause(  ) != null ) ? e.getCause(  ).getMessage(  ) : "" };
 
             return AdminMessageService.getMessageUrl( request, MESSAGE_SQL_ERROR_IN_QUERY, messageArgs, url.getUrl(  ),
                 AdminMessage.TYPE_STOP );
@@ -989,7 +989,7 @@ public class AdminSqlJspBean extends PluginAdminPageJspBean
             url.addParameter( PARAMETER_TABLE_NAME, strTableName );
             url.addParameter( PARAMETER_FIELD_NAME, strFieldName );
 
-            Object[] messageArgs = { e.getInitialException(  ).getMessage(  ) };
+            Object[] messageArgs = { ( e.getCause(  ) != null ) ? e.getCause(  ).getMessage(  ) : "" };
 
             return AdminMessageService.getMessageUrl( request, MESSAGE_SQL_ERROR_IN_QUERY, messageArgs, url.getUrl(  ),
                 AdminMessage.TYPE_STOP );
@@ -1178,7 +1178,7 @@ public class AdminSqlJspBean extends PluginAdminPageJspBean
             url.addParameter( PARAMETER_POOL_NAME, strPoolName );
             url.addParameter( PARAMETER_TABLE_NAME, strTableName );
 
-            Object[] messageArgs = { e.getInitialException(  ).getMessage(  ) };
+            Object[] messageArgs = { ( e.getCause(  ) != null ) ? e.getCause(  ).getMessage(  ) : "" };
 
             return AdminMessageService.getMessageUrl( request, MESSAGE_SQL_ERROR_IN_QUERY, messageArgs, url.getUrl(  ),
                 AdminMessage.TYPE_STOP );
@@ -1265,7 +1265,7 @@ public class AdminSqlJspBean extends PluginAdminPageJspBean
             url.addParameter( PARAMETER_POOL_NAME, strPoolName );
             url.addParameter( PARAMETER_TABLE_NAME, strTableName );
 
-            Object[] messageArgs = { e.getInitialException(  ).getMessage(  ) };
+            Object[] messageArgs = { ( e.getCause(  ) != null ) ? e.getCause(  ).getMessage(  ) : "" };
 
             return AdminMessageService.getMessageUrl( request, MESSAGE_SQL_ERROR_IN_QUERY, messageArgs, url.getUrl(  ),
                 AdminMessage.TYPE_STOP );
