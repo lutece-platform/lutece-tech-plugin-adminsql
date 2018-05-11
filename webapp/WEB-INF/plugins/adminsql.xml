@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<plug-in>
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?><plug-in>
 
     <name>adminsql</name>
     <class>fr.paris.lutece.portal.service.plugin.PluginDefaultImplementation</class>
-    <version>2.0.0</version>
+    <version>1.0.1</version>
     <description>adminsql.plugin.description</description>
     <provider>adminsql.plugin.provider</provider>
     <provider-url>http://lutece.paris.fr</provider-url>
