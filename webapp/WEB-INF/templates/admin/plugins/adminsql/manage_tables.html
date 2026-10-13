@@ -1,32 +1,34 @@
-<div class="content-box" >
-    
-    <h2>#i18n{adminsql.manage_tables.pageTitle}${pool_name}</h2>
-    
-    <table>
-        <tbody>
-            <th>#i18n{adminsql.manage_tables.columnTitleTables}</th>
-            <th>#i18n{adminsql.manage_tables.columnTitleAction}</th>
-                <#if table_list?has_content>
-                    <#list table_list?sort_by("tableName") as table >
-                        <tr>
-                            <td>
-                                ${table.tableName}
-                            </td>
-                            <td>
-                                <a title="#i18n{adminsql.manage_tables.linkTitleDataTable}" href="jsp/admin/plugins/adminsql/ManageData.jsp?pool_name=${pool_name}&table_name=${table.tableName}"><img src="images/admin/skin/plugins/adminsql/data_table.png"  /> </a>
-                                <a title="#i18n{adminsql.manage_tables.linkTitleStructureTable}" href="jsp/admin/plugins/adminsql/ManageFieldsStructure.jsp?pool_name=${pool_name}&table_name=${table.tableName}"><img src="images/admin/skin/plugins/adminsql/structure_table.png"/> </a>
-                                <a title="#i18n{adminsql.manage_tables.linkModifyTable}" href="jsp/admin/plugins/adminsql/ModifyTableName.jsp?pool_name=${pool_name}&table_name=${table.tableName}"><img src="images/admin/skin/actions/modify.png"/> </a>
-                                <a title="#i18n{adminsql.manage_tables.linkDeleteTable}" href="jsp/admin/plugins/adminsql/DeleteTable.jsp?pool_name=${pool_name}&table_name=${table.tableName}"><img src="images/admin/skin/actions/delete.png" /> </a>
-                            </td>
-                        </tr>
-                    </#list>
-                </#if>
-        </tbody>
-    </table>
-    <form method="post" action="jsp/admin/plugins/adminsql/CreateTable.jsp">
-        <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}"/>
-        <p>
-            <input value="#i18n{adminsql.manage_tables.buttonValueCreateTable}" class="button" type="submit">
-        </p>
-    </form>
-</div>
+<#assign poolParameter = 'pool_name=' + pool_name?url('UTF-8') />
+<@pageContainer>
+	<@pageColumn>
+		<#outputformat "HTML">
+		<@pageHeader title='#i18n{adminsql.manage_tables.pageTitle} ${pool_name}'>
+			<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=createTable&${poolParameter}' buttonIcon='plus' title='#i18n{adminsql.manage_tables.buttonValueCreateTable}' color='primary' class='me-1' />
+			<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageFonctionnalitiesList&${poolParameter}' buttonIcon='arrow-left' title='#i18n{portal.util.labelBack}' color='light' />
+		</@pageHeader>
+		<@messages infos=infos![] errors=errors![] warnings=warnings![] />
+		<#if table_list?has_content>
+			<@manageFeature>
+				<#list table_list?sort_by("tableName") as sqlTable>
+				<#assign tableParameter = poolParameter + '&table_name=' + sqlTable.tableName?url('UTF-8') />
+				<@manageFeatureItem>
+					<@manageFeatureItemColumn auto=true flex=false>
+						<@p class='mb-0'><@icon style='table' class='me-1' /><strong>${sqlTable.tableName}</strong></@p>
+					</@manageFeatureItemColumn>
+					<@manageFeatureItemColumn align='end'>
+						<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageData&${tableParameter}' buttonIcon='list-details' title='#i18n{adminsql.manage_tables.linkTitleDataTable}' hideTitle=['all'] class='me-1' />
+						<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageFieldsStructure&${tableParameter}' buttonIcon='columns' title='#i18n{adminsql.manage_tables.linkTitleStructureTable}' hideTitle=['all'] class='me-1' />
+						<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=modifyTableName&${tableParameter}' buttonIcon='edit' title='#i18n{adminsql.manage_tables.linkModifyTable}' hideTitle=['all'] class='me-1' />
+						<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=confirmRemoveTable&${tableParameter}' buttonIcon='trash' title='#i18n{adminsql.manage_tables.linkDeleteTable}' hideTitle=['all'] color='danger' />
+					</@manageFeatureItemColumn>
+				</@manageFeatureItem>
+				</#list>
+			</@manageFeature>
+		<#else>
+			<@card>
+				<@empty title='#i18n{adminsql.manage_tables.noTable}' iconName='table-off' actionTitle='#i18n{adminsql.manage_tables.buttonValueCreateTable}' actionUrl='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=createTable&${poolParameter}' />
+			</@card>
+		</#if>
+		</#outputformat>
+	</@pageColumn>
+</@pageContainer>

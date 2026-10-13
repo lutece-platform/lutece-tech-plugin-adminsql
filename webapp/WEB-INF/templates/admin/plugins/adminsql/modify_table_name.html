@@ -1,22 +1,22 @@
-<div class="content-box" >
-     
-    <h2>#i18n{adminsql.modify_table_name.pageTitle}&nbsp;${table.tableName}</h2>
-    
-    <form action="jsp/admin/plugins/adminsql/DoModifyTableName.jsp" method="post" name="">
-
-         <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}"/>
-        
-        <p>
-            <label for="">#i18n{adminsql.modify_table_name.table_name} </label>
-            &nbsp;
-            <input type="text" id="tableName" name="table_name" size="50" value="${table.tableName}" maxlength="50" tabindex="1" />
-            <input type="hidden" id="tableNameToModify" name="tableNameToModify" value="${table.tableName}"/>
-        </p>
-        
-        <input type="submit" value="#i18n{adminsql.modify_table_name.savetablename}" class="button" />
-        
-        <input type="button" name="undo" value="Annuler" class="button" onclick="javascript:history.go(-1)" />
-    
-    </form>
-    
-</div>    
+<#assign poolParameter = 'pool_name=' + pool_name?url('UTF-8') />
+<@pageContainer>
+	<@pageColumn>
+		<#outputformat "HTML">
+		<@pageHeader title='#i18n{adminsql.modify_table_name.pageTitle} ${sql_table.tableName!}'>
+			<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageTables&${poolParameter}' buttonIcon='arrow-left' title='#i18n{portal.util.labelBack}' color='light' />
+		</@pageHeader>
+		</#outputformat>
+		<@tform method='post' name='modify_table_name' action='jsp/admin/plugins/adminsql/ManageDatabases.jsp' type='horizontal' boxed=true>
+			<@input type='hidden' name='action' value='modifyTableName' />
+			<@input type='hidden' name='pool_name' value=pool_name />
+			<@input type='hidden' name='tableNameToModify' value=sql_table.tableName! />
+			<@formGroup labelFor='table_name' labelKey='#i18n{adminsql.modify_table_name.table_name}' mandatory=true>
+				<@input type='text' name='table_name' id='table_name' value=sql_table.tableName! maxlength=64 mandatory=true />
+			</@formGroup>
+			<@formGroup>
+				<@button type='submit' buttonIcon='check' title='#i18n{adminsql.modify_table_name.savetablename}' color='primary' />
+				<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageTables&${poolParameter}' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
+			</@formGroup>
+		</@tform>
+	</@pageColumn>
+</@pageContainer>

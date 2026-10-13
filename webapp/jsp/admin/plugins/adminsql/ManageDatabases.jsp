@@ -1,9 +1,9 @@
 <%@ page errorPage="../../ErrorPage.jsp" %>
+
+${ pageContext.setAttribute( 'strContent', adminSqlJspBean.processController( pageContext.request , pageContext.response ) ) }
+
 <jsp:include page="../../AdminHeader.jsp" />
 
-<jsp:useBean id="adminsql" scope="session" class="fr.paris.lutece.plugins.adminsql.web.AdminSqlJspBean" />
+${ pageContext.getAttribute( 'strContent' ) }
 
-<% adminsql.init( request , adminsql.RIGHT_MANAGE_ADMIN_SQL ); %>
-<%= adminsql.getManageDatabases( request )%>
-
-<%@include file="../../AdminFooter.jsp" %>
+<%@ include file="../../AdminFooter.jsp" %>

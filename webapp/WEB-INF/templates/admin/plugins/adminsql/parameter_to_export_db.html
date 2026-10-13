@@ -1,17 +1,21 @@
-<div class="content-box" >
-    
-    <h2>#i18n{adminsql.parameter_to_export.pageTitle}</h2>
-
-    <form action="jsp/admin/plugins/adminsql/DoExportDatabase.jsp" method="post" name="">
-           <input type="hidden" name="pool_name" value="${pool_name}" />
-        <legend><input type='checkbox' name='checkbox_database' checked="checked" value='on'><strong>#i18n{adminsql.parameter_to_export.choose_database}</strong></legend>
-        <br/>
-           <legend><input type='checkbox' name='checkbox_structure' checked="checked" value='on'><strong>#i18n{adminsql.parameter_to_export.choose_structure}</strong></legend>
-       <br/>
-           <legend><input type='checkbox' name='checkbox_data' checked="checked" value='on'><strong>#i18n{adminsql.parameter_to_export.choose_data}</strong></legend>
-    <br/>
-    <br/>
-        <input type="submit" value="#i18n{adminsql.exportdatabase.do_export}" class="button" />
-    </form>
-    
-</div>
+<@pageContainer>
+	<@pageColumn>
+		<#outputformat "HTML">
+		<@pageHeader title='#i18n{adminsql.parameter_to_export.pageTitle} ${pool_name}'>
+			<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageFonctionnalitiesList&pool_name=${pool_name?url("UTF-8")}' buttonIcon='arrow-left' title='#i18n{portal.util.labelBack}' color='light' />
+		</@pageHeader>
+		</#outputformat>
+		<@tform method='post' name='export_database' action='jsp/admin/plugins/adminsql/ManageDatabases.jsp' type='horizontal' boxed=true>
+			<@input type='hidden' name='action' value='exportDatabase' />
+			<@input type='hidden' name='pool_name' value=pool_name />
+			<@formGroup>
+				<@checkBox orientation='switch' name='checkbox_database' id='checkbox_database' value='on' checked=true labelKey='#i18n{adminsql.parameter_to_export.choose_database}' />
+				<@checkBox orientation='switch' name='checkbox_structure' id='checkbox_structure' value='on' checked=true labelKey='#i18n{adminsql.parameter_to_export.choose_structure}' />
+				<@checkBox orientation='switch' name='checkbox_data' id='checkbox_data' value='on' checked=true labelKey='#i18n{adminsql.parameter_to_export.choose_data}' />
+			</@formGroup>
+			<@formGroup>
+				<@button type='submit' buttonIcon='file-export' title='#i18n{adminsql.exportdatabase.do_export}' color='primary' />
+			</@formGroup>
+		</@tform>
+	</@pageColumn>
+</@pageContainer>

@@ -43,17 +43,33 @@ package fr.paris.lutece.plugins.adminsql.util;
 
 
 /**
- * This c
+ * Utilities of the adminsql plugin
  */
 public final class AdminSqlUtil
 {
+    /**
+     * Creates a new AdminSqlUtil object.
+     */
+    private AdminSqlUtil(  )
+    {
+    }
+
+    /**
+     * Splits a column type into its name and its length
+     *
+     * @param strFieldType the column type, as varchar(50)
+     * @return the type name and the length, empty when the type has none
+     */
     public static String[] getFieldDetails( String strFieldType )
     {
-        String[] strResult = { "", "" };
-        String str1 = strFieldType.substring( 0, strFieldType.indexOf( ")" ) );
-        strResult[0] = str1.substring( 0, strFieldType.indexOf( "(" ) );
-        strResult[1] = str1.substring( strFieldType.indexOf( "(" ) + 1 );
+        int nOpen = strFieldType.indexOf( '(' );
+        int nClose = strFieldType.indexOf( ')' );
 
-        return strResult;
+        if ( ( nOpen < 0 ) || ( nClose < nOpen ) )
+        {
+            return new String[] { strFieldType, "" };
+        }
+
+        return new String[] { strFieldType.substring( 0, nOpen ), strFieldType.substring( nOpen + 1, nClose ) };
     }
 }

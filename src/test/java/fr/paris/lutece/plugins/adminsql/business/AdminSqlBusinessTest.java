@@ -10,6 +10,9 @@ import fr.paris.lutece.portal.service.database.PluginConnectionService;
 import fr.paris.lutece.portal.service.plugin.Plugin;
 import fr.paris.lutece.portal.service.plugin.PluginService;
 import fr.paris.lutece.test.LuteceTestCase;
+
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,16 +58,20 @@ public class AdminSqlBusinessTest extends LuteceTestCase {
         super.tearDown();
     }*/
 
+    /**
+     * Creates, modifies and removes a table, its fields and its rows
+     */
+    @Test
     public void testAdminSqlBusiness( )
     {
         Plugin plugin = PluginService.getPlugin( "adminsql" );
-        plugin.setPoolName(POOL_PORTAL);
-
-        PluginConnectionService connectionService = new PluginConnectionService( plugin.getDbPoolName(  ) );
-
 
         if ( ( plugin != null ) && plugin.isInstalled(  ) )
         {
+            plugin.setPoolName( POOL_PORTAL );
+
+            PluginConnectionService connectionService = new PluginConnectionService( plugin.getDbPoolName(  ) );
+
             Table table = new Table(  );
             table.setTableName("bibi");
 
@@ -113,8 +120,8 @@ public class AdminSqlBusinessTest extends LuteceTestCase {
 
             System.out.println("update Table");
             Table table_1 = new Table( );
-            table_1.setTableName(strTableName);
-            TableHome.update(TABLE_NAME_MODIFY, table);
+            table_1.setTableName( TABLE_NAME_MODIFY );
+            TableHome.update( POOL_PORTAL, strTableName, table_1 );
             tableStored = TableHome.findByPrimaryKey(POOL_PORTAL, TABLE_NAME_MODIFY, plugin);
             assertEquals( TABLE_NAME_MODIFY, tableStored.getTableName( ) );
 
@@ -153,7 +160,7 @@ public class AdminSqlBusinessTest extends LuteceTestCase {
             listConcatFieldNameAndData.add( MODIFY_FIELD_NAME + "='" + DATA_2_updated + "'");
             DataHome.remove( POOL_PORTAL, TABLE_NAME_MODIFY, listConcatFieldNameAndData, connectionService );*/
             System.out.println("delete Field");
-            FieldHome.remove( TABLE_NAME_MODIFY, MODIFY_FIELD_NAME, plugin );
+            FieldHome.remove( POOL_PORTAL, TABLE_NAME_MODIFY, MODIFY_FIELD_NAME, plugin );
 
             System.out.println("delete Table");
             TableHome.remove( TABLE_NAME_MODIFY, plugin );

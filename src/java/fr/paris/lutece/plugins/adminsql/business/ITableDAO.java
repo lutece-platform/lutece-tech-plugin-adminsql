@@ -89,8 +89,9 @@ public interface ITableDAO
 
     /**
      * Store a table from a database
+     * @param strPoolName the name of the pool
      * @param strTableNameToModify the name of the table to modify
      * @param table Table object
      */
-    void store( String strTableNameToModify, Table table );
+    void store( String strPoolName, String strTableNameToModify, Table table );
 }

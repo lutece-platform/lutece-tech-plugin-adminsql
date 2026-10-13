@@ -1,17 +1,10 @@
-        
-<div class="content-box" >
-     
-    <h2>#i18n{adminsql.user_request.pageTitle}${pool_name}</h2>
-
-     <form action="jsp/admin/plugins/adminsql/DoUserRequest.jsp" method="post"> 
-        <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}"/>
-        <p>
-            <label style="text-align:left" for="">#i18n{adminsql.user_request.enter_request} :</label><br>
-            <br>
-            <textarea name="user_request" rows="6" cols="120"></textarea>
-        </p>
-        <input type="submit" value="#i18n{adminsql.user_request.executeRequest}" class="button" />
-        <input type="button" name="undo" value="Annuler" class="button" onclick="javascript:history.go(-1)" />
-     </form>
-    
-</div>
+<@pageContainer>
+	<@pageColumn>
+		<#outputformat "HTML">
+		<@pageHeader title='#i18n{adminsql.user_request.pageTitle} ${pool_name}'>
+			<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageFonctionnalitiesList&pool_name=${pool_name?url("UTF-8")}' buttonIcon='arrow-left' title='#i18n{portal.util.labelBack}' color='light' />
+		</@pageHeader>
+		</#outputformat>
+		<#include "user_request_form.html" />
+	</@pageColumn>
+</@pageContainer>

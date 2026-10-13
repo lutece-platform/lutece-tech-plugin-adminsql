@@ -34,7 +34,7 @@
 package fr.paris.lutece.plugins.adminsql.business;
 
 import fr.paris.lutece.portal.service.plugin.Plugin;
-import fr.paris.lutece.portal.service.spring.SpringContextService;
+import jakarta.enterprise.inject.spi.CDI;
 import fr.paris.lutece.util.ReferenceList;
 
 import java.util.List;
@@ -44,7 +44,7 @@ import java.util.List;
  */
 public final class FieldHome
 {
-    private static IFieldDAO _dao = (IFieldDAO) SpringContextService.getPluginBean( "adminsql", "fieldDAO" );
+    private static IFieldDAO _dao = CDI.current(  ).select( IFieldDAO.class ).get(  );
 
     /**
      * Find the list of all fields of a table
@@ -121,13 +121,14 @@ public final class FieldHome
 
     /**
      * Delete a field in a table
+     * @param strPoolName the name of the pool
      * @param strTableName the name of the table
      * @param strFieldName the name of the field
      * @param plugin Plugin adminsql
      */
-    public static void remove( String strTableName, String strFieldName, Plugin plugin )
+    public static void remove( String strPoolName, String strTableName, String strFieldName, Plugin plugin )
     {
-        _dao.delete( strTableName, strFieldName, plugin );
+        _dao.delete( strPoolName, strTableName, strFieldName, plugin );
     }
 
     /**

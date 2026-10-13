@@ -1,26 +1,36 @@
-<div class="content-box" >
-
-    <h2>#i18n{adminsql.choose_fonctionnality.pageTitle}${pool_name}</h2>
-    
-    <table>
-        <tbody>
-            <tr>
-                <td>
-                    <a alt="#i18n{adminsql.manage_databases.linkTitleManageTables}" title="#i18n{adminsql.manage_databases.linkTitleManageTables}" href="jsp/admin/plugins/adminsql/ManageTables.jsp?pool_name=${pool_name}" class="bullet-link">#i18n{adminsql.choose_fonctionnalities.linkTitleManageTables}</a>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <a alt="#i18n{adminsql.manage_databases.linkTitleUserRequest}" title="#i18n{adminsql.manage_databases.linkTitleUserRequest}" href="jsp/admin/plugins/adminsql/UserRequest.jsp?pool_name=${pool_name}" class="bullet-link">#i18n{adminsql.choose_fonctionnalities.linkTitleUserRequest}</a>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <a alt="#i18n{adminsql.manage_databases.linkTitleDumpOnDatabase}" title="#i18n{adminsql.manage_databases.linkTitleDumpOnDatabase}" href="jsp/admin/plugins/adminsql/ExportDatabase.jsp?pool_name=${pool_name}" class="bullet-link">#i18n{adminsql.choose_fonctionnalities.linkTitleDumpOnDatabase}</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    
-            <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}"/>
-</div>
+<#assign poolParameter = 'pool_name=' + pool_name?url('UTF-8') />
+<@pageContainer>
+	<@pageColumn>
+		<#outputformat "HTML">
+		<@pageHeader title='#i18n{adminsql.choose_fonctionnality.pageTitle} ${pool_name}'>
+			<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp' buttonIcon='arrow-left' title='#i18n{portal.util.labelBack}' color='light' />
+		</@pageHeader>
+		</#outputformat>
+		<@manageFeature>
+			<@manageFeatureItem>
+				<@manageFeatureItemColumn auto=true flex=false>
+					<@p class='mb-0'><@icon style='table' class='me-1' />#i18n{adminsql.choose_fonctionnalities.linkTitleManageTables}</@p>
+				</@manageFeatureItemColumn>
+				<@manageFeatureItemColumn align='end'>
+					<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageTables&${poolParameter}' buttonIcon='arrow-right' title='#i18n{adminsql.manage_databases.linkTitleManageTables}' hideTitle=['all'] />
+				</@manageFeatureItemColumn>
+			</@manageFeatureItem>
+			<@manageFeatureItem>
+				<@manageFeatureItemColumn auto=true flex=false>
+					<@p class='mb-0'><@icon style='terminal-2' class='me-1' />#i18n{adminsql.choose_fonctionnalities.linkTitleUserRequest}</@p>
+				</@manageFeatureItemColumn>
+				<@manageFeatureItemColumn align='end'>
+					<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=userRequest&${poolParameter}' buttonIcon='arrow-right' title='#i18n{adminsql.manage_databases.linkTitleUserRequest}' hideTitle=['all'] />
+				</@manageFeatureItemColumn>
+			</@manageFeatureItem>
+			<@manageFeatureItem>
+				<@manageFeatureItemColumn auto=true flex=false>
+					<@p class='mb-0'><@icon style='file-export' class='me-1' />#i18n{adminsql.choose_fonctionnalities.linkTitleDumpOnDatabase}</@p>
+				</@manageFeatureItemColumn>
+				<@manageFeatureItemColumn align='end'>
+					<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=exportDatabase&${poolParameter}' buttonIcon='arrow-right' title='#i18n{adminsql.manage_databases.linkTitleDumpOnDatabase}' hideTitle=['all'] />
+				</@manageFeatureItemColumn>
+			</@manageFeatureItem>
+		</@manageFeature>
+	</@pageColumn>
+</@pageContainer>
