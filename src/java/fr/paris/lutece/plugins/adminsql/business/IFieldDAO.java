@@ -101,11 +101,12 @@ public interface IFieldDAO
 
     /**
      * Delete field from a table
+     * @param strPoolName the name of the pool
      * @param strTableName the name of the table
      * @param strFieldName the name of the field
      * @param plugin Plugin adminsql
      */
-    void delete( String strTableName, String strFieldName, Plugin plugin );
+    void delete( String strPoolName, String strTableName, String strFieldName, Plugin plugin );
 
     /**
      * Store a field into a table

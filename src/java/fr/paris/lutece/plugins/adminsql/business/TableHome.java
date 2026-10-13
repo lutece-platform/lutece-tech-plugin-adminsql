@@ -34,7 +34,7 @@
 package fr.paris.lutece.plugins.adminsql.business;
 
 import fr.paris.lutece.portal.service.plugin.Plugin;
-import fr.paris.lutece.portal.service.spring.SpringContextService;
+import jakarta.enterprise.inject.spi.CDI;
 
 
 import java.util.List;
@@ -45,7 +45,7 @@ import java.util.List;
  */
 public final class TableHome
 {
-    private static ITableDAO _dao = (ITableDAO) SpringContextService.getPluginBean( "adminsql", "tableDAO" );
+    private static ITableDAO _dao = CDI.current(  ).select( ITableDAO.class ).get(  );
 
     /**
      * Find the tables list of a pool
@@ -105,11 +105,12 @@ public final class TableHome
 
     /**
      * Update a table on a database
+     * @param strPoolName the name of the pool
      * @param strTableNameToModify
      * @param table Table object
      */
-    public static void update( String strTableNameToModify, Table table )
+    public static void update( String strPoolName, String strTableNameToModify, Table table )
     {
-        _dao.store( strTableNameToModify, table );
+        _dao.store( strPoolName, strTableNameToModify, table );
     }
 }

@@ -1,51 +1,40 @@
-<div class="content-box" >
-
-    <h2>#i18n{adminsql.manage_data.pageTitle}${table.tableName}</h2>
-    
-     <table>
-        <tbody>
-            <tr>
-                <#list field_list as field>
-                <#if field.idKeyValue==1>
-                    <th>
-                        ${field.fieldName}
-                    </th>
-                 <#else>
-                    <th>
-                        <u>${field.fieldName}</u>
-                    </th>
-                 </#if >   
-                </#list>
-                <th>
-                    #i18n{adminsql.manage_data.columnTitleAction}
-                </th>
-            </tr>
-            
-                <#list data_list as row>
-                <tr>
-                    <#assign row_to_modify = "toto">
-                    <#list row as data>
-                        <#if data_has_next>
-                        <td>
-                            ${data}
-                        </td>
-                        <#else>
-                            <#assign row_to_modify = data>
-                        </#if>
-                    </#list>
-                    <td>
-                        <a href="jsp/admin/plugins/adminsql/ModifyData.jsp?pool_name=${pool_name}&table_name=${table.tableName}${row_to_modify}"<img src="images/admin/skin/actions/modify.png" alt="#i18n{adminsql.manage_data.ModifyData}" /> </a>
-                        <a href="jsp/admin/plugins/adminsql/DeleteData.jsp?pool_name=${pool_name}&table_name=${table.tableName}${row_to_modify}"<img src="images/admin/skin/actions/delete.png" alt="#i18n{adminsql.manage_data.DeleteData}" /> </a>
-                    </td>
-                 </tr>
-                </#list>
-            </tbody>
-        </table>
-    <form method="get" action="jsp/admin/plugins/adminsql/CreateData.jsp">
-        <input value="${pool_name}" name="pool_name" type="hidden" />
-        <input type="hidden" id="table_name" name="table_name" value="${table.tableName}"/>
-        <p>
-            <input value="#i18n{adminsql.manage_create.buttonValueCreateData}" class="button" type="submit">
-        </p>
-    </form>
-</div>
+<#assign tableParameter = 'pool_name=' + pool_name?url('UTF-8') + '&table_name=' + sql_table.tableName?url('UTF-8') />
+<@pageContainer>
+	<@pageColumn>
+		<#outputformat "HTML">
+		<@pageHeader title='#i18n{adminsql.manage_data.pageTitle} ${sql_table.tableName}'>
+			<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=createData&${tableParameter}' buttonIcon='plus' title='#i18n{adminsql.manage_create.buttonValueCreateData}' color='primary' class='me-1' />
+			<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageFieldsStructure&${tableParameter}' buttonIcon='columns' title='#i18n{adminsql.manage_tables.linkTitleStructureTable}' color='light' hideTitle=['xs','sm','md'] class='me-1' />
+			<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageTables&pool_name=${pool_name?url("UTF-8")}' buttonIcon='arrow-left' title='#i18n{portal.util.labelBack}' color='light' />
+		</@pageHeader>
+		<@messages infos=infos![] errors=errors![] warnings=warnings![] />
+		<#if data_list?has_content>
+			<@table headBody=true>
+				<@tr>
+					<#list field_list as field>
+					<@th>${field.fieldName}</@th>
+					</#list>
+					<@th align='end'>#i18n{adminsql.manage_data.columnTitleAction}</@th>
+				</@tr>
+				<@tableHeadBodySeparator />
+				<#list data_list as row>
+				<@tr>
+					<#list row.values as data>
+					<@td>${data}</@td>
+					</#list>
+					<@td align='end'>
+						<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=modifyData&${tableParameter}&${row.parameters}' buttonIcon='edit' title='#i18n{adminsql.manage_data.linkModifyData}' hideTitle=['all'] size='sm' class='me-1' />
+						<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=confirmRemoveData&${tableParameter}&${row.parameters}' buttonIcon='trash' title='#i18n{adminsql.manage_data.linkDeleteData}' hideTitle=['all'] size='sm' color='danger' />
+					</@td>
+				</@tr>
+				</#list>
+			</@table>
+			<@paginationAdmin paginator=paginator combo=1 />
+		<#else>
+			<@card>
+				<@empty title='#i18n{adminsql.manage_data.noData}' iconName='database-off' actionTitle='#i18n{adminsql.manage_create.buttonValueCreateData}' actionUrl='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=createData&${tableParameter}' />
+			</@card>
+		</#if>
+		</#outputformat>
+	</@pageColumn>
+</@pageContainer>

@@ -1,3 +1,7 @@
+-- liquibase formatted sql
+-- changeset adminsql:create_db_adminsql.sql
+-- preconditions onFail:MARK_RAN onError:WARN
+-- precondition-sql-check expectedResult:1 SELECT COUNT(*) FROM adminsql_field_type WHERE 1 = 0
 DROP TABLE IF EXISTS adminsql_field_type;
 
 CREATE TABLE adminsql_field_type (

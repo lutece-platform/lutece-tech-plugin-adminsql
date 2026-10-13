@@ -33,22 +33,22 @@
  */
 package fr.paris.lutece.plugins.adminsql.business;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import fr.paris.lutece.plugins.adminsql.service.AdminSqlConnectionService;
 import fr.paris.lutece.portal.service.database.PluginConnectionService;
 import fr.paris.lutece.portal.service.plugin.Plugin;
-import fr.paris.lutece.portal.service.plugin.PluginService;
 import fr.paris.lutece.util.ReferenceItem;
 import fr.paris.lutece.util.ReferenceList;
 import fr.paris.lutece.util.sql.DAOUtil;
 
-
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Creates a new instance of TableDAO
  */
+@ApplicationScoped
 public class TableDAO implements ITableDAO
 {
     //Constantes
@@ -96,18 +96,18 @@ public class TableDAO implements ITableDAO
     public Table load( String strPoolName, String strTableName, Plugin plugin )
     {
         Table table = new Table(  );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_A_TABLE_ON_DATABASE_1 + strTableName, plugin );
-        daoUtil.executeQuery(  );
-
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_A_TABLE_ON_DATABASE_1 + strTableName, plugin ) )
         {
-            table.setTableName( strTableName );
-            table.setFieldName( daoUtil.getString( 2 ) );
-            table.setFieldNull( daoUtil.getString( 3 ) );
-            table.setPrimaryKey( daoUtil.getString( 4 ) );
-        }
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
+            if ( daoUtil.next(  ) )
+            {
+                table.setTableName( strTableName );
+                table.setFieldName( daoUtil.getString( 2 ) );
+                table.setFieldNull( daoUtil.getString( 3 ) );
+                table.setPrimaryKey( daoUtil.getString( 4 ) );
+            }
+        }
 
          return table;
     }
@@ -166,32 +166,38 @@ public class TableDAO implements ITableDAO
         else
         {
             strDEFAULT = "DEFAULT";
-            strFieldLabelDefaultValue = " '" + strFieldLabelDefaultValue + "' ";
+            strFieldLabelDefaultValue = " ? ";
         }
-		 String strTableName = table.getTableName(  );
-System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + " " +
-                strFieldLabelType + " " + strKey + " " + strFieldLabelNullValue + " " + strDEFAULT +
-                strFieldLabelDefaultValue + ")");
-       
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + " " +
-                strFieldLabelType + " " + strKey + " " + strFieldLabelNullValue + " " + strDEFAULT +
-                strFieldLabelDefaultValue + ")", plugin );
 
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        String strTableName = table.getTableName(  );
+
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + " " +
+                strFieldLabelType + " " + strKey + " " + strFieldLabelNullValue + " " + strDEFAULT +
+                strFieldLabelDefaultValue + ")", plugin ) )
+        {
+            if ( !field.getDefaultValue(  ).isEmpty(  ) )
+            {
+                daoUtil.setString( 1, field.getDefaultValue(  ) );
+            }
+
+            daoUtil.executeUpdate(  );
+        }
     }
 
     /**
      * Store a table into a database
+     * @param strPoolName the name of the pool
      * @param strTableNameToModify the name of the table to modify
      * @param table Table object
      */
-    public void store( String strTableNameToModify, Table table )
+    public void store( String strPoolName, String strTableNameToModify, Table table )
     {
         String strTableName = table.getTableName(  );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_MODIFY_TABLE_NAME + strTableName + RENAME_TO + strTableNameToModify );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_MODIFY_TABLE_NAME + strTableNameToModify + RENAME_TO + strTableName,
+                AdminSqlConnectionService.usePool( strPoolName ) ) )
+        {
+            daoUtil.executeUpdate(  );
+        }
     }
 
     /**
@@ -201,9 +207,10 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
      */
     public void delete( String strTableName, Plugin plugin )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_DELETE_TABLE + strTableName, plugin );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_DELETE_TABLE + strTableName, plugin ) )
+        {
+            daoUtil.executeUpdate(  );
+        }
     }
 
     /**
@@ -214,17 +221,17 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
     public List<Table> selectTableList( Plugin plugin )
     {
         List<Table> tableList = new ArrayList<Table>(  );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SHOW_DATABASE_TABLES, plugin );
-        daoUtil.executeQuery(  );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SHOW_DATABASE_TABLES, plugin ) )
         {
-            Table table = new Table(  );
-            table.setTableName( daoUtil.getString( 1 ) );
-            tableList.add( table );
-        }
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
+            while ( daoUtil.next(  ) )
+            {
+                Table table = new Table(  );
+                table.setTableName( daoUtil.getString( 1 ) );
+                tableList.add( table );
+            }
+        }
 
         return tableList;
     }
@@ -237,20 +244,20 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
      */
     public List<Table> selectTableListByPool( String strPoolName, Plugin plugin )
     {
-        plugin.setConnectionService( AdminSqlConnectionService.getInstance(  ).getConnectionService( strPoolName ) );
+        AdminSqlConnectionService.usePool( strPoolName );
 
         List<Table> tableList = new ArrayList<Table>(  );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SHOW_DATABASE_TABLES, plugin );
-        daoUtil.executeQuery(  );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SHOW_DATABASE_TABLES, plugin ) )
         {
-            Table table = new Table(  );
-            table.setTableName( daoUtil.getString( 1 ) );
-            tableList.add( table );
-        }
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
+            while ( daoUtil.next(  ) )
+            {
+                Table table = new Table(  );
+                table.setTableName( daoUtil.getString( 1 ) );
+                tableList.add( table );
+            }
+        }
 
         return tableList;
     }
@@ -263,19 +270,19 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
     public ReferenceList selectFieldTypeList( Plugin plugin )
     {
         ReferenceList fieldtypeList = new ReferenceList(  );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_TYPE, plugin );
-
-        daoUtil.executeQuery(  );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_TYPE, plugin ) )
         {
-            ReferenceItem item = new ReferenceItem(  );
-            item.setCode( daoUtil.getString( 1 ) );
-            item.setName( daoUtil.getString( 2 ) );
-            fieldtypeList.add( item );
-        }
 
-        daoUtil.free(  );
+            daoUtil.executeQuery(  );
+
+            while ( daoUtil.next(  ) )
+            {
+                ReferenceItem item = new ReferenceItem(  );
+                item.setCode( daoUtil.getString( 1 ) );
+                item.setName( daoUtil.getString( 2 ) );
+                fieldtypeList.add( item );
+            }
+        }
 
         return fieldtypeList;
     }
@@ -289,19 +296,19 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
     public ReferenceList selectFieldKeyList( Plugin plugin )
     {
         ReferenceList fieldkeyList = new ReferenceList(  );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_KEY, plugin );
-
-        daoUtil.executeQuery(  );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_KEY, plugin ) )
         {
-            ReferenceItem item = new ReferenceItem(  );
-            item.setCode( daoUtil.getString( 1 ) );
-            item.setName( daoUtil.getString( 2 ) );
-            fieldkeyList.add( item );
-        }
 
-        daoUtil.free(  );
+            daoUtil.executeQuery(  );
+
+            while ( daoUtil.next(  ) )
+            {
+                ReferenceItem item = new ReferenceItem(  );
+                item.setCode( daoUtil.getString( 1 ) );
+                item.setName( daoUtil.getString( 2 ) );
+                fieldkeyList.add( item );
+            }
+        }
 
         return fieldkeyList;
     }
@@ -315,19 +322,19 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
     public ReferenceList selectFieldNullList( Plugin plugin )
     {
         ReferenceList fieldnullList = new ReferenceList(  );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_NULL, plugin );
-
-        daoUtil.executeQuery(  );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_NULL, plugin ) )
         {
-            ReferenceItem item = new ReferenceItem(  );
-            item.setCode( daoUtil.getString( 1 ) );
-            item.setName( daoUtil.getString( 2 ) );
-            fieldnullList.add( item );
-        }
 
-        daoUtil.free(  );
+            daoUtil.executeQuery(  );
+
+            while ( daoUtil.next(  ) )
+            {
+                ReferenceItem item = new ReferenceItem(  );
+                item.setCode( daoUtil.getString( 1 ) );
+                item.setName( daoUtil.getString( 2 ) );
+                fieldnullList.add( item );
+            }
+        }
 
         return fieldnullList;
     }
@@ -341,19 +348,19 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
      */
     public int findFieldTypeIdbyLabel( String strLabelType, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_TYPE_ID, getDefaultPool( plugin ) );
-        daoUtil.setString( 1, strLabelType );
-        daoUtil.executeQuery(  );
-
         int nIdFieldType = 0;
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_TYPE_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            nIdFieldType = daoUtil.getInt( 1 );
-        }
+            daoUtil.setString( 1, strLabelType );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                nIdFieldType = daoUtil.getInt( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return nIdFieldType;
     }
@@ -367,19 +374,19 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
      */
     public String findFieldTypeLabelbyId( int nId, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_TYPE_LABEL_BY_ID, getDefaultPool( plugin ) );
-        daoUtil.setInt( 1, nId );
-        daoUtil.executeQuery(  );
-
         String strFieldTypeLabel = "";
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_TYPE_LABEL_BY_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            strFieldTypeLabel = daoUtil.getString( 1 );
-        }
+            daoUtil.setInt( 1, nId );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                strFieldTypeLabel = daoUtil.getString( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return strFieldTypeLabel;
     }
@@ -393,19 +400,19 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
      */
     public int findFieldNullIdbyLabel( String strLabelNull, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_NULL_ID, getDefaultPool( plugin ) );
-        daoUtil.setString( 1, strLabelNull );
-        daoUtil.executeQuery(  );
-
         int nIdFieldNull = 0;
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_NULL_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            nIdFieldNull = daoUtil.getInt( 1 );
-        }
+            daoUtil.setString( 1, strLabelNull );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                nIdFieldNull = daoUtil.getInt( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return nIdFieldNull;
     }
@@ -419,19 +426,19 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
      */
     public String findFieldNullLabelbyId( int nId, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_NULL_LABEL_BY_ID, getDefaultPool( plugin ) );
-        daoUtil.setInt( 1, nId );
-        daoUtil.executeQuery(  );
-
         String strFieldNullLabel = "";
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_NULL_LABEL_BY_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            strFieldNullLabel = daoUtil.getString( 1 );
-        }
+            daoUtil.setInt( 1, nId );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                strFieldNullLabel = daoUtil.getString( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return strFieldNullLabel;
     }
@@ -445,19 +452,19 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
      */
     public int findFieldKeyIdbyLabel( String strLabelKey, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_KEY_ID, getDefaultPool( plugin ) );
-        daoUtil.setString( 1, strLabelKey );
-        daoUtil.executeQuery(  );
-
         int nIdFieldKey = 0;
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_KEY_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            nIdFieldKey = daoUtil.getInt( 1 );
-        }
+            daoUtil.setString( 1, strLabelKey );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                nIdFieldKey = daoUtil.getInt( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return nIdFieldKey;
     }
@@ -471,41 +478,21 @@ System.out.println(SQL_QUERY_CREATE_TABLE + strTableName + "(" + strFieldName + 
      */
     public String findFieldKeyLabelbyId( int nId, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_KEY_LABEL_BY_ID, getDefaultPool( plugin ) );
-        daoUtil.setInt( 1, nId );
-        daoUtil.executeQuery(  );
-
         String strFieldKeyLabel = "";
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_KEY_LABEL_BY_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            strFieldKeyLabel = daoUtil.getString( 1 );
-        }
+            daoUtil.setInt( 1, nId );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                strFieldKeyLabel = daoUtil.getString( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return strFieldKeyLabel;
     }
 
-    private Plugin changePool( String strPoolName )
-    {
-        Plugin plugin = PluginService.getPlugin( "adminsql" );
-
-        // plugin.setPoolName(strPoolName );
-        PluginConnectionService connectionService = new PluginConnectionService( strPoolName );
-        connectionService.setPool( strPoolName );
-        plugin.setConnectionService( connectionService );
-
-        return plugin;
-    }
-
-    private Plugin getDefaultPool( Plugin plugin )
-    {
-        PluginConnectionService connectionService = new PluginConnectionService( plugin.getDbPoolName(  ) );
-        connectionService.setPool( "adminsql" );
-        plugin.setConnectionService( connectionService );
-
-        return plugin; //TODO in properties
-    }
 }

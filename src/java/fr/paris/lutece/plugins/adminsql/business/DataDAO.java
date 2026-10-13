@@ -33,9 +33,11 @@
  */
 package fr.paris.lutece.plugins.adminsql.business;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
+import fr.paris.lutece.plugins.adminsql.service.AdminSqlConnectionService;
 import fr.paris.lutece.portal.service.database.PluginConnectionService;
 import fr.paris.lutece.portal.service.plugin.Plugin;
-import fr.paris.lutece.portal.service.plugin.PluginService;
 import fr.paris.lutece.portal.service.util.AppException;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.util.sql.DAOUtil;
@@ -47,13 +49,15 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.StringTokenizer;
-
 
 /**
  * Creates a new instance of DataDAO
  */
+@ApplicationScoped
 public class DataDAO implements IDataDAO
 {
     //Constants
@@ -69,6 +73,9 @@ public class DataDAO implements IDataDAO
 
     //Requêtes
     private static final String SQL_QUERY_SELECT_ALL_DATA = "SELECT * FROM ";
+    private static final String SQL_QUERY_COUNT_ROWS = "SELECT COUNT(*) FROM ";
+    private static final String LIMIT = " LIMIT ";
+    private static final String OFFSET = " OFFSET ";
     private static final String SQL_QUERY_SELECT_A_ROW = "SELECT * FROM ";
     private static final String SQL_QUERY_INSERT_VALUES = "INSERT INTO ";
 
@@ -95,6 +102,44 @@ public class DataDAO implements IDataDAO
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int countRows( String strTableName, PluginConnectionService connectionService )
+    {
+        try
+        {
+            List<List<String>> listCount = selectSqlQuery( SQL_QUERY_COUNT_ROWS + strTableName, connectionService );
+
+            return listCount.isEmpty(  ) ? 0 : Integer.parseInt( listCount.get( 0 ).get( 0 ) );
+        }
+        catch ( SQLException sql )
+        {
+            AppLogService.error( sql.getMessage(  ), sql );
+
+            return 0;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<List<String>> selectDataPage( String strTableName, int nOffset, int nLimit, PluginConnectionService connectionService )
+    {
+        try
+        {
+            return selectSqlQuery( SQL_QUERY_SELECT_ALL_DATA + strTableName + LIMIT + nLimit + OFFSET + nOffset, connectionService );
+        }
+        catch ( SQLException sql )
+        {
+            AppLogService.error( sql.getMessage(  ), sql );
+
+            return new ArrayList<>(  );
+        }
+    }
+
+    /**
      * Selects and loads into the Data object all the data from the database in user request
      * @param strPoolName the name of the pool
      * @param strUserRequest user request
@@ -104,20 +149,14 @@ public class DataDAO implements IDataDAO
     public List<List<String>> selectDataListUserRequest( String strPoolName, String strUserRequest,
         PluginConnectionService connectionService )
     {
-        List<List<String>> listData = new ArrayList<List<String>>(  );
-        connectionService = new PluginConnectionService( strPoolName );
-        connectionService.setPool( strPoolName );
-
         try
         {
-            listData = selectSqlQuery( strUserRequest, connectionService );
+            return selectSqlQuery( strUserRequest, new PluginConnectionService( strPoolName ) );
         }
-        catch ( SQLException sql )
+        catch ( SQLException e )
         {
-            AppLogService.error( sql.getMessage(  ), sql );
+            throw new AppException( e.getMessage(  ), e );
         }
-
-        return listData;
     }
 
     /**
@@ -131,30 +170,20 @@ public class DataDAO implements IDataDAO
     public void insert( String strPoolName, String strTableName, List<String> listData, List<String> listFieldsNames,
         PluginConnectionService connectionService )
     {
-        String strFieldsNames = "";
-        String strDataValues = "";
+        String strSql = SQL_QUERY_INSERT_VALUES + strTableName + " (" + String.join( ", ", listFieldsNames ) + ")" + VALUES + "(" +
+            String.join( ", ", Collections.nCopies( listData.size(  ), "?" ) ) + ")";
 
-        for ( String strFieldName : listFieldsNames )
+        try ( DAOUtil daoUtil = new DAOUtil( strSql, AdminSqlConnectionService.usePool( strPoolName ) ) )
         {
-            strFieldsNames = strFieldsNames + strFieldName + ", ";
+            int nIndex = 1;
+
+            for ( String strData : listData )
+            {
+                daoUtil.setString( nIndex++, strData );
+            }
+
+            daoUtil.executeUpdate(  );
         }
-
-        strFieldsNames = strFieldsNames.substring( 0, strFieldsNames.length(  ) - 2 );
-
-        String strFieldsNameFinal = " (" + strFieldsNames + ") ";
-
-        for ( String strDataValue : listData )
-        {
-            strDataValues += ( "'" + strDataValue + "'" + ", " );
-        }
-
-        strDataValues = strDataValues.substring( 0, strDataValues.length(  ) - 2 );
-
-        String strDataValuesFinal = " (" + strDataValues + ") ";
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_INSERT_VALUES + strTableName + " " + strFieldsNameFinal + VALUES +
-                strDataValuesFinal, changePool( strPoolName ) );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
     }
 
     /**
@@ -167,49 +196,54 @@ public class DataDAO implements IDataDAO
     public void store( String strPoolName, String strTableName, List<FieldValues> listFieldValues,
         PluginConnectionService connectionService )
     {
-        String strAllDataToModify = "";
-        String strAllDataModified = "";
+        StringJoiner sjSet = new StringJoiner( ", " );
 
         for ( FieldValues fieldValues : listFieldValues )
         {
-            strAllDataModified = strAllDataModified + "," + fieldValues.getFieldName(  ) + "=" + "'" +
-                fieldValues.getNewValue(  ) + "'";
-            strAllDataToModify = strAllDataToModify + AND + fieldValues.getFieldName(  ) + "=" + "'" +
-                fieldValues.getOldValue(  ) + "'";
+            sjSet.add( fieldValues.getFieldName(  ) + " = ?" );
         }
 
-        strAllDataModified = strAllDataModified.substring( 1 );
-        strAllDataToModify = strAllDataToModify.substring( 4 );
+        try ( DAOUtil daoUtil = new DAOUtil( UPDATE + strTableName + SET + sjSet + WHERE + getWhereClause( listFieldValues ),
+                AdminSqlConnectionService.usePool( strPoolName ) ) )
+        {
+            int nIndex = 1;
 
-        DAOUtil daoUtil = new DAOUtil( UPDATE + strTableName + SET + strAllDataModified + WHERE + strAllDataToModify,
-                changePool( strPoolName ) );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+            for ( FieldValues fieldValues : listFieldValues )
+            {
+                daoUtil.setString( nIndex++, fieldValues.getNewValue(  ) );
+            }
+
+            for ( FieldValues fieldValues : listFieldValues )
+            {
+                daoUtil.setString( nIndex++, fieldValues.getOldValue(  ) );
+            }
+
+            daoUtil.executeUpdate(  );
+        }
     }
 
     /**
      * Delete a row in a table
      * @param strPoolName the name of the pool
      * @param strTableName the name of the table
-     * @param listConcatFieldNameAndData the list of concatenation of fields name and data
+     * @param listFieldValues the fields of the row and their values
      * @param connectionService PluginConnectionService object
      */
-    public void delete( String strPoolName, String strTableName, List<String> listConcatFieldNameAndData,
+    public void delete( String strPoolName, String strTableName, List<FieldValues> listFieldValues,
         PluginConnectionService connectionService )
     {
-        String strAllDataToDelete = "";
-
-        for ( String strConcatFieldNameAndData : listConcatFieldNameAndData )
+        try ( DAOUtil daoUtil = new DAOUtil( DELETE_FROM + strTableName + WHERE + getWhereClause( listFieldValues ),
+                AdminSqlConnectionService.usePool( strPoolName ) ) )
         {
-            strAllDataToDelete = strAllDataToDelete + AND + strConcatFieldNameAndData;
+            int nIndex = 1;
+
+            for ( FieldValues fieldValues : listFieldValues )
+            {
+                daoUtil.setString( nIndex++, fieldValues.getOldValue(  ) );
+            }
+
+            daoUtil.executeUpdate(  );
         }
-
-        strAllDataToDelete = strAllDataToDelete.substring( 4 );
-
-        DAOUtil daoUtil = new DAOUtil( DELETE_FROM + strTableName + WHERE + strAllDataToDelete,
-                changePool( strPoolName ) );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
     }
 
     /**
@@ -221,9 +255,10 @@ public class DataDAO implements IDataDAO
     public void insertWithUserRequest( String strUserRequest, PluginConnectionService connectionService,
         String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( strUserRequest, changePool( strPoolName ) );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        try ( DAOUtil daoUtil = new DAOUtil( strUserRequest, AdminSqlConnectionService.usePool( strPoolName ) ) )
+        {
+            daoUtil.executeUpdate(  );
+        }
     }
 
     /**
@@ -237,8 +272,10 @@ public class DataDAO implements IDataDAO
     public List<List<String>> load( String strTableName, String strContatFieldNameAndData, List<Field> listFields,
         PluginConnectionService connectionService )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_A_ROW + strTableName + WHERE + strContatFieldNameAndData );
-        daoUtil.executeQuery(  );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_A_ROW + strTableName + WHERE + strContatFieldNameAndData ) )
+        {
+            daoUtil.executeQuery(  );
+        }
         List<List<String>> listDataValueSelectedByPK = new ArrayList(  );
         return listDataValueSelectedByPK;
     }
@@ -252,60 +289,31 @@ public class DataDAO implements IDataDAO
     private List<List<String>> selectSqlQuery( String strRequest, PluginConnectionService connectionService )
         throws SQLException
     {
-        Connection connection = null;
-        PreparedStatement statement = null;
+        Connection connection = connectionService.getConnection(  );
 
-        try
+        try ( PreparedStatement statement = connection.prepareStatement( strRequest );
+              ResultSet resultSet = statement.executeQuery(  ) )
         {
-            connection = connectionService.getConnection(  );
-            statement = connection.prepareStatement( strRequest );
-
-            ResultSet resultSet = statement.executeQuery(  );
             ResultSetMetaData rsmd = resultSet.getMetaData(  );
-
-            ArrayList listRow = new ArrayList(  );
+            List<List<String>> listRow = new ArrayList<>(  );
 
             while ( resultSet.next(  ) )
             {
-                String strValue = null;
-                ArrayList listLine = new ArrayList(  );
+                List<String> listLine = new ArrayList<>(  );
 
                 for ( int i = 1; i <= rsmd.getColumnCount(  ); i++ )
                 {
-                    if ( resultSet.getObject( rsmd.getColumnName( i ) ) != null )
-                    {
-                        strValue = resultSet.getObject( rsmd.getColumnName( i ) ).toString(  );
-                    }
-                    else
-                    {
-                        strValue = " ";
-                    }
-
-                    listLine.add( strValue );
+                    Object value = resultSet.getObject( i );
+                    listLine.add( ( value != null ) ? value.toString(  ) : " " );
                 }
 
                 listRow.add( listLine );
             }
 
-            statement.close(  );
-            statement = null;
-
             return listRow;
         }
         finally
         {
-            try
-            {
-                if ( statement != null )
-                {
-                    statement.close(  );
-                }
-            }
-            catch ( SQLException e )
-            {
-                throw new AppException( "SQL Error executing command : " + e.toString(  ) );
-            }
-
             connectionService.freeConnection( connection );
         }
     }
@@ -344,16 +352,16 @@ public class DataDAO implements IDataDAO
         String strPoolName )
     {
         List<String> listFields = new ArrayList(  );
-        DAOUtil daoUtil = new DAOUtil( strUserRequest, changePool( strPoolName ) );
-        daoUtil.executeQuery(  );
-
-        for ( int i = 1; i <= getColumnCount( daoUtil ); i++ )
+        try ( DAOUtil daoUtil = new DAOUtil( strUserRequest, AdminSqlConnectionService.usePool( strPoolName ) ) )
         {
-            String columnName = getColumnName( i, daoUtil );
-            listFields.add( columnName );
-        }
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
+            for ( int i = 1; i <= getColumnCount( daoUtil ); i++ )
+            {
+                String columnName = getColumnName( i, daoUtil );
+                listFields.add( columnName );
+            }
+        }
 
         return listFields;
     }
@@ -368,7 +376,6 @@ public class DataDAO implements IDataDAO
         }
         catch ( SQLException e )
         {
-            daoUtil.free(  );
             throw new AppException( STR_SQL_ERROR + e.toString(  ) );
         }
     }
@@ -383,18 +390,26 @@ public class DataDAO implements IDataDAO
         }
         catch ( SQLException e )
         {
-            daoUtil.free(  );
             throw new AppException( STR_SQL_ERROR + e.toString(  ) );
         }
     }
 
-    private Plugin changePool( String strPoolName )
-    {
-        Plugin plugin = PluginService.getPlugin( "adminsql" );
-        PluginConnectionService connectionService = new PluginConnectionService( strPoolName );
-        connectionService.setPool( strPoolName );
-        plugin.setConnectionService( connectionService );
 
-        return plugin;
+    /**
+     * Builds the where clause naming a row by the values of its fields
+     *
+     * @param listFieldValues the fields and their values
+     * @return the where clause, one bound parameter per field
+     */
+    private static String getWhereClause( List<FieldValues> listFieldValues )
+    {
+        StringJoiner sjWhere = new StringJoiner( AND );
+
+        for ( FieldValues fieldValues : listFieldValues )
+        {
+            sjWhere.add( fieldValues.getFieldName(  ) + " = ?" );
+        }
+
+        return sjWhere.toString(  );
     }
 }

@@ -1,16 +1,26 @@
-<div class="content-box" >
-
-    <h2>#i18n{adminsql.manage_databases.pageTitle}</h2>
-    
-     <table>
-        <tbody>
-            <#list pool_list as pool>
-            <tr>
-                <td>
-                     <a alt="#i18n{adminsql.manage_databases.linkTitleManageFonctionnalitiesList}"  title="#i18n{adminsql.manage_databases.linkTitleManageFonctionnalitiesList}" href="jsp/admin/plugins/adminsql/ManageFonctionnalitiesList.jsp?pool_name=${pool.code}" class="bullet-link">${pool.name}</a>
-                 </td>
-            </tr>
-            </#list>
-        </tbody>
-    </table>
-</div>
+<@pageContainer>
+	<@pageColumn>
+		<@pageHeader title='#i18n{adminsql.manage_databases.pageTitle}' />
+		<@messages infos=infos![] errors=errors![] warnings=warnings![] />
+		<#outputformat "HTML">
+		<#if pool_list?has_content>
+			<@manageFeature>
+				<#list pool_list as pool>
+				<@manageFeatureItem>
+					<@manageFeatureItemColumn auto=true flex=false>
+						<@p class='mb-0'><@icon style='database' class='me-1' /><strong>${pool.name}</strong></@p>
+					</@manageFeatureItemColumn>
+					<@manageFeatureItemColumn align='end'>
+						<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageFonctionnalitiesList&pool_name=${pool.code?url("UTF-8")}' buttonIcon='list' title='#i18n{adminsql.manage_databases.linkTitleManageFonctionnalitiesList}' hideTitle=['xs','sm'] />
+					</@manageFeatureItemColumn>
+				</@manageFeatureItem>
+				</#list>
+			</@manageFeature>
+		<#else>
+			<@card>
+				<@empty title='#i18n{adminsql.manage_databases.noPool}' subtitle=' ' iconName='database-off' />
+			</@card>
+		</#if>
+		</#outputformat>
+	</@pageColumn>
+</@pageContainer>

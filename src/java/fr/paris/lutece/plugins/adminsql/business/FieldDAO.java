@@ -33,22 +33,23 @@
  */
 package fr.paris.lutece.plugins.adminsql.business;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
+import fr.paris.lutece.plugins.adminsql.service.AdminSqlConnectionService;
 import fr.paris.lutece.plugins.adminsql.util.AdminSqlUtil;
 import fr.paris.lutece.portal.service.database.PluginConnectionService;
 import fr.paris.lutece.portal.service.plugin.Plugin;
-import fr.paris.lutece.portal.service.plugin.PluginService;
 import fr.paris.lutece.util.ReferenceItem;
 import fr.paris.lutece.util.ReferenceList;
 import fr.paris.lutece.util.sql.DAOUtil;
 
-
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Creates a new instance of DataDAO
  */
+@ApplicationScoped
 public class FieldDAO implements IFieldDAO
 {
     //Constantes
@@ -63,7 +64,6 @@ public class FieldDAO implements IFieldDAO
     private static final String UNIQUE_KEY = "UNIQUE";
     private static final String DROP = " DROP ";
     private static final String DROP_KEY = " ,DROP ";
-    private static final String POOL_ADMINSQL = "adminsql";
 
     //Requêtes
     private static final String SQL_QUERY_SHOW_TABLE_FIELDS_STRUCTURE = " SHOW COLUMNS FROM ";
@@ -90,64 +90,65 @@ public class FieldDAO implements IFieldDAO
      */
     public Field load( String strPoolName, String strTableName, String strFieldName, Plugin plugin )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_A_FIELD_ON_TABLE + strTableName + " " + strFieldName, plugin );
-        daoUtil.executeQuery(  );
-
         Field field = new Field(  );
-        String[] tabString = { "", "" };
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_A_FIELD_ON_TABLE + strTableName + " " + strFieldName, plugin ) )
         {
-            field.setFieldName( daoUtil.getString( 1 ) );
-            field.setTypeValue( daoUtil.getString( 2 ) );
+            daoUtil.executeQuery(  );
 
-            String strFieldType = field.getTypeValue(  );
+            String[] tabString = { "", "" };
 
-            if ( strFieldType.equals( "date" ) || strFieldType.equals( "datetime" ) || strFieldType.equals( "time" ) ||
-                    strFieldType.equals( "timestamp" ) || strFieldType.equals( "text" ) ||
-                    strFieldType.equals( "tinytext" ) || strFieldType.equals( "longtext" ) ||
-                    strFieldType.equals( "mediumtext" ) || strFieldType.equals( "blob" ) ||
-                    strFieldType.equals( "tinyblob" ) || strFieldType.equals( "longblob" ) ||
-                    strFieldType.equals( "mediumblob" ) )
+            if ( daoUtil.next(  ) )
             {
-                field.setLabelTypeValue( strFieldType );
-                field.setLengthTypeValue( "" );
-                field.setIdTypeValue( findFieldTypeIdbyLabel( strFieldType, plugin, strPoolName ) );
-            }
-            else
-            {
-                tabString = AdminSqlUtil.getFieldDetails( field.getTypeValue(  ) );
-                field.setLabelTypeValue( tabString[0] );
-                field.setLengthTypeValue( tabString[1] );
-                field.setIdTypeValue( findFieldTypeIdbyLabel( tabString[0], plugin, strPoolName ) );
-            }
+                field.setFieldName( daoUtil.getString( 1 ) );
+                field.setTypeValue( daoUtil.getString( 2 ) );
 
-            field.setLabelNullValue( daoUtil.getString( 3 ) );
+                String strFieldType = field.getTypeValue(  );
 
-            int nFieldIdNull = findFieldNullIdbyLabel( daoUtil.getString( 3 ), plugin, strPoolName );
-            field.setIdNullValue( nFieldIdNull );
+                if ( strFieldType.equals( "date" ) || strFieldType.equals( "datetime" ) || strFieldType.equals( "time" ) ||
+                        strFieldType.equals( "timestamp" ) || strFieldType.equals( "text" ) ||
+                        strFieldType.equals( "tinytext" ) || strFieldType.equals( "longtext" ) ||
+                        strFieldType.equals( "mediumtext" ) || strFieldType.equals( "blob" ) ||
+                        strFieldType.equals( "tinyblob" ) || strFieldType.equals( "longblob" ) ||
+                        strFieldType.equals( "mediumblob" ) )
+                {
+                    field.setLabelTypeValue( strFieldType );
+                    field.setLengthTypeValue( "" );
+                    field.setIdTypeValue( findFieldTypeIdbyLabel( strFieldType, plugin, strPoolName ) );
+                }
+                else
+                {
+                    tabString = AdminSqlUtil.getFieldDetails( field.getTypeValue(  ) );
+                    field.setLabelTypeValue( tabString[0] );
+                    field.setLengthTypeValue( tabString[1] );
+                    field.setIdTypeValue( findFieldTypeIdbyLabel( tabString[0], plugin, strPoolName ) );
+                }
 
-            String strLabelKeyValue = daoUtil.getString( 4 );
+                field.setLabelNullValue( daoUtil.getString( 3 ) );
 
-            if ( strLabelKeyValue.equals( "PRI" ) )
-            {
-                strLabelKeyValue = "PRIMAIRE";
-            }
+                int nFieldIdNull = findFieldNullIdbyLabel( daoUtil.getString( 3 ), plugin, strPoolName );
+                field.setIdNullValue( nFieldIdNull );
 
-            int nFieldIdKey = findFieldKeyIdbyLabel( strLabelKeyValue, plugin, strPoolName );
-            field.setIdKeyValue( nFieldIdKey );
+                String strLabelKeyValue = daoUtil.getString( 4 );
 
-            if ( daoUtil.getString( 5 ) == null )
-            {
-                field.setDefaultValue( NULL_VALUE );
-            }
-            else
-            {
-                field.setDefaultValue( daoUtil.getString( 5 ) );
+                if ( strLabelKeyValue.equals( "PRI" ) )
+                {
+                    strLabelKeyValue = "PRIMAIRE";
+                }
+
+                int nFieldIdKey = findFieldKeyIdbyLabel( strLabelKeyValue, plugin, strPoolName );
+                field.setIdKeyValue( nFieldIdKey );
+
+                if ( daoUtil.getString( 5 ) == null )
+                {
+                    field.setDefaultValue( NULL_VALUE );
+                }
+                else
+                {
+                    field.setDefaultValue( daoUtil.getString( 5 ) );
+                }
             }
         }
-
-        daoUtil.free(  );
 
         return field;
     }
@@ -224,15 +225,21 @@ public class FieldDAO implements IFieldDAO
         else
         {
             strDEFAULT = "DEFAULT";
-            strFieldLabelDefaultValueFinal = " '" + strFieldLabelDefaultValue + "'";
+            strFieldLabelDefaultValueFinal = " ?";
         }
 
         String strAlterQuery = SQL_QUERY_UPDATE + " " + strTableName + " " + CHANGE + " " + strFieldNameToModify + " " +
             strFieldName + " " + strFieldLabelType + " " + " " + strFieldLabelNullValue + " " + strDEFAULT +
             strFieldLabelDefaultValueFinal + " " + strKey + strNewPrimaryKey;
-        DAOUtil daoUtil = new DAOUtil( strAlterQuery, plugin );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        try ( DAOUtil daoUtil = new DAOUtil( strAlterQuery, plugin ) )
+        {
+            if ( !field.getDefaultValue(  ).isEmpty(  ) )
+            {
+                daoUtil.setString( 1, field.getDefaultValue(  ) );
+            }
+
+            daoUtil.executeUpdate(  );
+        }
     }
 
     /**
@@ -303,7 +310,7 @@ public class FieldDAO implements IFieldDAO
         else
         {
             strDEFAULT = "DEFAULT";
-            strFieldLabelDefaultValue = " '" + strFieldLabelDefaultValue + "' ";
+            strFieldLabelDefaultValue = " ? ";
         }
 
         int nAddFieldEndOfTable = field.getFieldEndOfTable(  );
@@ -334,24 +341,32 @@ public class FieldDAO implements IFieldDAO
             strAFTER = "";
         }
 
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_UPDATE + strTableName + " " + ADD + " " + strFieldName + " " +
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_UPDATE + strTableName + " " + ADD + " " + strFieldName + " " +
                 strFieldLabelType + " " + strKey + " " + strFieldLabelNullValue + " " + strDEFAULT +
-                strFieldLabelDefaultValue + strFIRST + strAFTER + " " + strAfterTheField, plugin );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+                strFieldLabelDefaultValue + strFIRST + strAFTER + " " + strAfterTheField, plugin ) )
+        {
+            if ( !field.getDefaultValue(  ).isEmpty(  ) )
+            {
+                daoUtil.setString( 1, field.getDefaultValue(  ) );
+            }
+
+            daoUtil.executeUpdate(  );
+        }
     }
 
     /**
      * Delete a field from the table
+     * @param strPoolName the name of the pool
      * @param strTableName the name of the table
      * @param strFieldName the name of the field
      * @param plugin adminsql plugin
      */
-    public void delete( String strTableName, String strFieldName, Plugin plugin )
+    public void delete( String strPoolName, String strTableName, String strFieldName, Plugin plugin )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_DELETE_FIELD + strTableName + DROP + strFieldName );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_DELETE_FIELD + strTableName + DROP + strFieldName, AdminSqlConnectionService.usePool( strPoolName ) ) )
+        {
+            daoUtil.executeUpdate(  );
+        }
     }
 
     /**
@@ -364,36 +379,36 @@ public class FieldDAO implements IFieldDAO
     public List<Field> selectFieldList( String strPoolName, String strTableName, Plugin plugin )
     {
         List<Field> fieldList = new ArrayList<Field>(  );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SHOW_TABLE_FIELDS_STRUCTURE + strTableName, changePool( strPoolName ) );
-        daoUtil.executeQuery(  );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SHOW_TABLE_FIELDS_STRUCTURE + strTableName, AdminSqlConnectionService.usePool( strPoolName ) ) )
         {
-            Field field = new Field(  );
-            field.setFieldName( daoUtil.getString( 1 ) );
-            field.setTypeValue( daoUtil.getString( 2 ) );
-            field.setLabelNullValue( daoUtil.getString( 3 ) );
+            daoUtil.executeQuery(  );
 
-            int nFieldIdNull = findFieldNullIdbyLabel( daoUtil.getString( 3 ), plugin, strPoolName );
-            field.setIdNullValue( nFieldIdNull );
-            field.setLabelKeyValue( daoUtil.getString( 4 ) );
-
-            int nFieldIdKey = findFieldKeyIdbyLabel( daoUtil.getString( 4 ), plugin, strPoolName );
-            field.setIdKeyValue( nFieldIdKey );
-
-            if ( daoUtil.getString( 5 ) == null )
+            while ( daoUtil.next(  ) )
             {
-                field.setDefaultValue( NULL_VALUE );
-            }
-            else
-            {
-                field.setDefaultValue( daoUtil.getString( 5 ) );
-            }
+                Field field = new Field(  );
+                field.setFieldName( daoUtil.getString( 1 ) );
+                field.setTypeValue( daoUtil.getString( 2 ) );
+                field.setLabelNullValue( daoUtil.getString( 3 ) );
 
-            fieldList.add( field );
+                int nFieldIdNull = findFieldNullIdbyLabel( daoUtil.getString( 3 ), plugin, strPoolName );
+                field.setIdNullValue( nFieldIdNull );
+                field.setLabelKeyValue( daoUtil.getString( 4 ) );
+
+                int nFieldIdKey = findFieldKeyIdbyLabel( daoUtil.getString( 4 ), plugin, strPoolName );
+                field.setIdKeyValue( nFieldIdKey );
+
+                if ( daoUtil.getString( 5 ) == null )
+                {
+                    field.setDefaultValue( NULL_VALUE );
+                }
+                else
+                {
+                    field.setDefaultValue( daoUtil.getString( 5 ) );
+                }
+
+                fieldList.add( field );
+            }
         }
-
-        daoUtil.free(  );
 
         return fieldList;
     }
@@ -407,20 +422,20 @@ public class FieldDAO implements IFieldDAO
     public ReferenceList selectFieldTypeList( String strPoolName, Plugin plugin )
     {
         ReferenceList fieldtypeList = new ReferenceList(  );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_TYPE, getDefaultPool( plugin ) );
-
-        daoUtil.executeQuery(  );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_TYPE, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            ReferenceItem item = new ReferenceItem(  );
-            item.setCode( daoUtil.getString( 1 ) );
-            item.setName( daoUtil.getString( 2 ) );
-            fieldtypeList.add( item );
-        }
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            daoUtil.executeQuery(  );
+
+            while ( daoUtil.next(  ) )
+            {
+                ReferenceItem item = new ReferenceItem(  );
+                item.setCode( daoUtil.getString( 1 ) );
+                item.setName( daoUtil.getString( 2 ) );
+                fieldtypeList.add( item );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return fieldtypeList;
     }
@@ -434,20 +449,20 @@ public class FieldDAO implements IFieldDAO
     public ReferenceList selectFieldKeyList( String strPoolName, Plugin plugin )
     {
         ReferenceList fieldkeyList = new ReferenceList(  );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_KEY, getDefaultPool( plugin ) );
-
-        daoUtil.executeQuery(  );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_KEY, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            ReferenceItem item = new ReferenceItem(  );
-            item.setCode( daoUtil.getString( 1 ) );
-            item.setName( daoUtil.getString( 2 ) );
-            fieldkeyList.add( item );
-        }
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            daoUtil.executeQuery(  );
+
+            while ( daoUtil.next(  ) )
+            {
+                ReferenceItem item = new ReferenceItem(  );
+                item.setCode( daoUtil.getString( 1 ) );
+                item.setName( daoUtil.getString( 2 ) );
+                fieldkeyList.add( item );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return fieldkeyList;
     }
@@ -461,19 +476,19 @@ public class FieldDAO implements IFieldDAO
     public ReferenceList selectFieldNullList( String strPoolName, Plugin plugin )
     {
         ReferenceList fieldnullList = new ReferenceList(  );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_NULL, getDefaultPool( plugin ) );
-
-        daoUtil.executeQuery(  );
-
-        while ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECTALL_FIELD_NULL, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            ReferenceItem item = new ReferenceItem(  );
-            item.setCode( daoUtil.getString( 1 ) );
-            item.setName( daoUtil.getString( 2 ) );
-            fieldnullList.add( item );
-        }
 
-        daoUtil.free(  );
+            daoUtil.executeQuery(  );
+
+            while ( daoUtil.next(  ) )
+            {
+                ReferenceItem item = new ReferenceItem(  );
+                item.setCode( daoUtil.getString( 1 ) );
+                item.setName( daoUtil.getString( 2 ) );
+                fieldnullList.add( item );
+            }
+        }
 
         return fieldnullList;
     }
@@ -487,19 +502,19 @@ public class FieldDAO implements IFieldDAO
      */
     public int findFieldTypeIdbyLabel( String strLabelType, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_TYPE_ID, getDefaultPool( plugin ) );
-        daoUtil.setString( 1, strLabelType );
-        daoUtil.executeQuery(  );
-
         int nIdFieldType = 0;
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_TYPE_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            nIdFieldType = daoUtil.getInt( 1 );
-        }
+            daoUtil.setString( 1, strLabelType );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                nIdFieldType = daoUtil.getInt( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return nIdFieldType;
     }
@@ -513,19 +528,19 @@ public class FieldDAO implements IFieldDAO
      */
     public String findFieldTypeLabelbyId( int nId, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_TYPE_LABEL_BY_ID, getDefaultPool( plugin ) );
-        daoUtil.setInt( 1, nId );
-        daoUtil.executeQuery(  );
-
         String strFieldTypeLabel = "";
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_TYPE_LABEL_BY_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            strFieldTypeLabel = daoUtil.getString( 1 );
-        }
+            daoUtil.setInt( 1, nId );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                strFieldTypeLabel = daoUtil.getString( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return strFieldTypeLabel;
     }
@@ -539,19 +554,19 @@ public class FieldDAO implements IFieldDAO
      */
     public int findFieldNullIdbyLabel( String strLabelNull, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_NULL_ID, getDefaultPool( plugin ) );
-        daoUtil.setString( 1, strLabelNull );
-        daoUtil.executeQuery(  );
-
         int nIdFieldNull = 0;
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_NULL_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            nIdFieldNull = daoUtil.getInt( 1 );
-        }
+            daoUtil.setString( 1, strLabelNull );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                nIdFieldNull = daoUtil.getInt( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return nIdFieldNull;
     }
@@ -565,19 +580,19 @@ public class FieldDAO implements IFieldDAO
      */
     public String findFieldNullLabelbyId( int nId, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_NULL_LABEL_BY_ID, getDefaultPool( plugin ) );
-        daoUtil.setInt( 1, nId );
-        daoUtil.executeQuery(  );
-
         String strFieldNullLabel = "";
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_NULL_LABEL_BY_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            strFieldNullLabel = daoUtil.getString( 1 );
-        }
+            daoUtil.setInt( 1, nId );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                strFieldNullLabel = daoUtil.getString( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return strFieldNullLabel;
     }
@@ -591,19 +606,19 @@ public class FieldDAO implements IFieldDAO
      */
     public int findFieldKeyIdbyLabel( String strLabelKey, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_KEY_ID, getDefaultPool( plugin ) );
-        daoUtil.setString( 1, strLabelKey );
-        daoUtil.executeQuery(  );
-
         int nIdFieldKey = 0;
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_KEY_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            nIdFieldKey = daoUtil.getInt( 1 );
-        }
+            daoUtil.setString( 1, strLabelKey );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                nIdFieldKey = daoUtil.getInt( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return nIdFieldKey;
     }
@@ -617,40 +632,21 @@ public class FieldDAO implements IFieldDAO
      */
     public String findFieldKeyLabelbyId( int nId, Plugin plugin, String strPoolName )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_KEY_LABEL_BY_ID, getDefaultPool( plugin ) );
-        daoUtil.setInt( 1, nId );
-        daoUtil.executeQuery(  );
-
         String strFieldKeyLabel = "";
 
-        if ( daoUtil.next(  ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_FIND_FIELD_KEY_LABEL_BY_ID, AdminSqlConnectionService.usePluginPool( plugin ) ) )
         {
-            strFieldKeyLabel = daoUtil.getString( 1 );
-        }
+            daoUtil.setInt( 1, nId );
+            daoUtil.executeQuery(  );
 
-        daoUtil.free(  );
-        plugin = changePool( strPoolName );
+            if ( daoUtil.next(  ) )
+            {
+                strFieldKeyLabel = daoUtil.getString( 1 );
+            }
+        }
+        AdminSqlConnectionService.usePool( strPoolName );
 
         return strFieldKeyLabel;
     }
 
-    private Plugin changePool( String strPoolName )
-    {
-        Plugin plugin = PluginService.getPlugin( "adminsql" );
-
-        PluginConnectionService connectionService = new PluginConnectionService( strPoolName );
-        connectionService.setPool( strPoolName );
-        plugin.setConnectionService( connectionService );
-
-        return plugin;
-    }
-
-    private Plugin getDefaultPool( Plugin plugin )
-    {
-        PluginConnectionService connectionService = new PluginConnectionService( plugin.getDbPoolName(  ) );
-        connectionService.setPool( "adminsql" );
-        plugin.setConnectionService( connectionService );
-
-        return plugin; //TODO in properties
-    }
 }

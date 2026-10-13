@@ -31,32 +31,50 @@
  *
  * License 1.0
  */
-package fr.paris.lutece.plugins.adminsql.business;
+package fr.paris.lutece.plugins.adminsql.web;
 
-import fr.paris.lutece.portal.service.database.PluginConnectionService;
-import fr.paris.lutece.portal.service.plugin.Plugin;
-
-import java.util.Collection;
+import java.io.Serializable;
 import java.util.List;
 
 
 /**
-* IStructureTableDAO Interface
-*/
-public interface IStructureTableDAO
+ * A row of a table, with the parameters that name it in an url
+ */
+public class DataRow implements Serializable
 {
+    private static final long serialVersionUID = 4127513069211208425L;
+    private final List<String> _listValues;
+    private final String _strParameters;
+
     /**
-    * Load the data of all the structureTable objects and returns them as a collection
-    * @param plugin the Plugin
-    * @return The collection which contains the data of all the structureTable objects
-    */
-    List<List<String>> selectAllColumns( PluginConnectionService connectionService, String strTableName );
+     * Creates a new DataRow object.
+     *
+     * @param listValues the values of the row
+     * @param strParameters the url parameters holding the values of the row
+     */
+    public DataRow( List<String> listValues, String strParameters )
+    {
+        _listValues = listValues;
+        _strParameters = strParameters;
+    }
 
-    List<List<String>> selectAllTables( PluginConnectionService connectionService );
+    /**
+     * Returns the values of the row
+     *
+     * @return the values
+     */
+    public List<String> getValues(  )
+    {
+        return _listValues;
+    }
 
-    List<List<String>> selectAllData( PluginConnectionService connectionService, String strTableName );
-
-    List<List<String>> selectAllFields( PluginConnectionService connectionService, String strTableName );
-
-    List<List<String>> selectAField( PluginConnectionService connectionService, String strTableName, String strFieldName );
+    /**
+     * Returns the url parameters holding the values of the row
+     *
+     * @return the parameters, as col_name=value joined by &amp;
+     */
+    public String getParameters(  )
+    {
+        return _strParameters;
+    }
 }

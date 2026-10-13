@@ -65,6 +65,24 @@ public interface IDataDAO
     List<List<String>> selectDataList( String strTableName, PluginConnectionService connectionService );
 
     /**
+     * Counts the rows of a table
+     * @param strTableName the name of the table
+     * @param connectionService PluginConnectionService object
+     * @return the number of rows
+     */
+    int countRows( String strTableName, PluginConnectionService connectionService );
+
+    /**
+     * Selects one page of the rows of a table
+     * @param strTableName the name of the table
+     * @param nOffset the index of the first row
+     * @param nLimit the number of rows
+     * @param connectionService PluginConnectionService object
+     * @return the rows of the page
+     */
+    List<List<String>> selectDataPage( String strTableName, int nOffset, int nLimit, PluginConnectionService connectionService );
+
+    /**
      * Creates a new instance of IDataDAO
      * @param strPoolName the name of the pool
      * @param strUserRequest user request
@@ -137,9 +155,9 @@ public interface IDataDAO
      * Delete a row
      * @param strPoolName the name of the pool
      * @param strTableName the name of the table
-     * @param listConcatFieldNameAndData the concatenation of the field name and the data
+     * @param listFieldValues the fields of the row and their values
      * @param connectionService PluginConnectionService object
      */
-    void delete( String strPoolName, String strTableName, List<String> listConcatFieldNameAndData,
+    void delete( String strPoolName, String strTableName, List<FieldValues> listFieldValues,
         PluginConnectionService connectionService );
 }

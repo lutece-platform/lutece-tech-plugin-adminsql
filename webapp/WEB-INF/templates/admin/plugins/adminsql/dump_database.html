@@ -1,8 +1,14 @@
-<div class="content-box" >
-    
-    <pre style="width:98%;overflow:scroll">
-${dump_commands}
-    </pre>
-    
-    
-</div>
+<@pageContainer>
+	<@pageColumn>
+		<#outputformat "HTML">
+		<@pageHeader title='#i18n{adminsql.parameter_to_export.pageTitle} ${pool_name}'>
+			<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=exportDatabase&pool_name=${pool_name?url("UTF-8")}' buttonIcon='arrow-left' title='#i18n{portal.util.labelBack}' color='light' />
+		</@pageHeader>
+		<@box>
+			<@boxBody>
+				<pre class="mb-0" id="dump" style="max-height:70vh;overflow:auto">${dump_commands}</pre>
+			</@boxBody>
+		</@box>
+		</#outputformat>
+	</@pageColumn>
+</@pageContainer>

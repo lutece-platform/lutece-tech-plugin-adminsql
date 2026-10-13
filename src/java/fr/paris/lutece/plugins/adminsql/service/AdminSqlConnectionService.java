@@ -35,18 +35,23 @@ package fr.paris.lutece.plugins.adminsql.service;
 
 import fr.paris.lutece.portal.service.database.AppConnectionService;
 import fr.paris.lutece.portal.service.database.PluginConnectionService;
+import fr.paris.lutece.portal.service.plugin.Plugin;
+import fr.paris.lutece.portal.service.plugin.PluginService;
 
-import java.util.Hashtable;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * This class provides AdminSqlConnectionService object
+ * This class provides the connection services of the pools browsed by adminsql
  */
 public final class AdminSqlConnectionService
 {
-    //Constants
-    private static AdminSqlConnectionService _singleton = new AdminSqlConnectionService(  );
-    private static Hashtable _htConnectionServices = new Hashtable(  );
+    /** The name of the plugin */
+    public static final String PLUGIN_NAME = "adminsql";
+    private static final Map<String, PluginConnectionService> _mapConnectionServices = new ConcurrentHashMap<>(  );
 
     /**
      * Creates a new AdminSqlConnectionService object.
@@ -64,34 +69,45 @@ public final class AdminSqlConnectionService
      */
     public static PluginConnectionService getConnectionService( String strPoolName )
     {
-        PluginConnectionService connectionService = null;
-
-        if ( ( strPoolName != null ) && ( !strPoolName.equals( "" ) ) )
+        if ( StringUtils.isEmpty( strPoolName ) )
         {
-            if ( _htConnectionServices.contains( strPoolName ) )
-            {
-                connectionService = (PluginConnectionService) _htConnectionServices.get( strPoolName );
-            }
-            else
-            {
-                connectionService = new PluginConnectionService( strPoolName );
-                _htConnectionServices.put( strPoolName, connectionService );
-            }
-        }
-        else
-        {
-            connectionService = AppConnectionService.getDefaultConnectionService(  );
+            return AppConnectionService.getDefaultConnectionService(  );
         }
 
-        return connectionService;
+        return _mapConnectionServices.computeIfAbsent( strPoolName, PluginConnectionService::new );
     }
 
     /**
-     * Provides singleton to connection service
-     * @return Returns an instance of the connection service
+     * Points the connection service of the adminsql plugin to a pool
+     *
+     * @param strPoolName The name of the pool
+     * @return the adminsql plugin
      */
-    public static AdminSqlConnectionService getInstance(  )
+    public static Plugin usePool( String strPoolName )
     {
-        return _singleton;
+        Plugin plugin = PluginService.getPlugin( PLUGIN_NAME );
+        plugin.setConnectionService( new PluginConnectionService( strPoolName ) );
+
+        return plugin;
+    }
+
+    /**
+     * Points the connection service of the adminsql plugin to the pool holding its own tables
+     *
+     * @param plugin The adminsql plugin
+     * @return the adminsql plugin
+     */
+    public static Plugin usePluginPool( Plugin plugin )
+    {
+        String strPoolName = plugin.getDbPoolName(  );
+
+        if ( StringUtils.isEmpty( strPoolName ) || AppConnectionService.NO_POOL_DEFINED.equals( strPoolName ) )
+        {
+            strPoolName = AppConnectionService.DEFAULT_POOL_NAME;
+        }
+
+        plugin.setConnectionService( new PluginConnectionService( strPoolName ) );
+
+        return plugin;
     }
 }

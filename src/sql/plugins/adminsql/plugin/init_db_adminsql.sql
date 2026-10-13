@@ -1,3 +1,7 @@
+-- liquibase formatted sql
+-- changeset adminsql:init_db_adminsql.sql
+-- preconditions onFail:MARK_RAN onError:WARN
+-- precondition-sql-check expectedResult:0 SELECT COUNT(*) FROM adminsql_field_type
 insert into adminsql_field_key (id_field_key, label_field_key) values('1',' ');
 insert into adminsql_field_key (id_field_key, label_field_key) values('2','PRIMAIRE');
 

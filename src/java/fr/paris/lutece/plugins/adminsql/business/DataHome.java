@@ -42,7 +42,7 @@
 package fr.paris.lutece.plugins.adminsql.business;
 
 import fr.paris.lutece.portal.service.database.PluginConnectionService;
-import fr.paris.lutece.portal.service.spring.SpringContextService;
+import jakarta.enterprise.inject.spi.CDI;
 
 
 import java.util.List;
@@ -53,7 +53,7 @@ import java.util.List;
  */
 public class DataHome
 {
-    private static IDataDAO _dao = (IDataDAO) SpringContextService.getPluginBean( "adminsql", "dataDAO" );
+    private static IDataDAO _dao = CDI.current(  ).select( IDataDAO.class ).get(  );
 
     /**
      * Creates a new instance of DataHome
@@ -64,6 +64,30 @@ public class DataHome
     public static List<List<String>> findAll( String strTableName, PluginConnectionService connectionService )
     {
         return _dao.selectDataList( strTableName, connectionService );
+    }
+
+    /**
+     * Counts the rows of a table
+     * @param strTableName Name of the table
+     * @param connectionService Plugin connectionService
+     * @return the number of rows
+     */
+    public static int countRows( String strTableName, PluginConnectionService connectionService )
+    {
+        return _dao.countRows( strTableName, connectionService );
+    }
+
+    /**
+     * Finds one page of the rows of a table
+     * @param strTableName Name of the table
+     * @param nOffset the index of the first row
+     * @param nLimit the number of rows
+     * @param connectionService Plugin connectionService
+     * @return the rows of the page
+     */
+    public static List<List<String>> findPage( String strTableName, int nOffset, int nLimit, PluginConnectionService connectionService )
+    {
+        return _dao.selectDataPage( strTableName, nOffset, nLimit, connectionService );
     }
 
     /**
@@ -163,12 +187,12 @@ public class DataHome
      * Delete a row
      * @param strPoolName the name of the pool
      * @param strTableName the name of the table
-     * @param listConcatFieldNameAndData list of concatenation of field name and data
+     * @param listFieldValues the fields of the row and their values
      * @param connectionService PluginConnectionService object
      */
-    public static void remove( String strPoolName, String strTableName, List<String> listConcatFieldNameAndData,
+    public static void remove( String strPoolName, String strTableName, List<FieldValues> listFieldValues,
         PluginConnectionService connectionService )
     {
-        _dao.delete( strPoolName, strTableName, listConcatFieldNameAndData, connectionService );
+        _dao.delete( strPoolName, strTableName, listFieldValues, connectionService );
     }
 }

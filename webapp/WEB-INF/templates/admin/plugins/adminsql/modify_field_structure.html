@@ -1,48 +1,41 @@
-<div class="content-box" >
-     
-    <h2>#i18n{adminsql.modify_field_structure.pageTitle}${field.fieldName}&nbsp;#i18n{adminsql.modify_field_structure_tableName.pageTitle}${table.tableName}</h2>
-    
-    <form action="jsp/admin/plugins/adminsql/DoModifyFieldStructure.jsp" method="post" name="">
-
-         <input type="hidden" id="pool_name" name="pool_name" value="${pool_name}"/>
-        <input type="hidden" id="table_name" name="table_name" value="${table.tableName}"/>
-        
-        <p>
-            <label for="">#i18n{adminsql.modify_field_structure.columnField} </label>
-            &nbsp;
-            <input type="text" id="fieldName" name="field_name" size="50" value="${field.fieldName}" maxlength="50" tabindex="1" />
-            <input type="hidden" id="fieldToModify" name="fieldToModify" value="${field.fieldName}"/>
-        </p>
-        <p>
-            <label for="">#i18n{adminsql.modify_field_structure.columnType} </label>
-            &nbsp;
-            <@combo name="field_type_id" default_value="${field.idFieldType}" items=field_type_list/>
-            &nbsp;
-            <input type="text" id="field_length_type" name="field_length_type" size="20" value="${field.lengthTypeValue}" maxlength="20" tabindex="1" />
-        </p>
-        <p>
-            <label for="">#i18n{adminsql.modify_field_structure.columnNull} </label>
-            &nbsp;
-        <@combo name="field_null_id" default_value="${field.idFieldNull}" items=field_null_list/>
-        </p>
-        <p>
-            <label for="">#i18n{adminsql.modify_field_structure.columnKey} </label>
-            &nbsp;
-            <@combo name="field_key_id" default_value="${field.idKeyValue}" items=field_key_list/>
-            <input type="hidden" id="idOldFieldKey" name="idOldFieldKey" value="${field.idKeyValue}"/>
-        </p>
-        <#if ( field.idFieldNull=1 && field.idFieldKey=1)>
-        <p>
-            <label for="">#i18n{adminsql.modify_field_structure.columnDefault} </label>
-            &nbsp;
-            <input type="text" id="field_default_value" name="field_default_value" size="50" value="${field.defaultValue}" maxlength="50" tabindex="1" />
-        </p>
-        </#if>
-        
-        <input type="submit" value="#i18n{adminsql.modify_field_structure.savefieldstructure}" class="button" />
-        
-        <input type="button" name="undo" value="Annuler" class="button" onclick="javascript:history.go(-1)" />
-    
-    </form>
-    
-</div>    
+<#assign tableParameter = 'pool_name=' + pool_name?url('UTF-8') + '&table_name=' + sql_table.tableName?url('UTF-8') />
+<@pageContainer>
+	<@pageColumn>
+		<#outputformat "HTML">
+		<@pageHeader title='#i18n{adminsql.modify_field_structure.pageTitle} ${field.fieldName!} #i18n{adminsql.modify_field_structure_tableName.pageTitle} ${sql_table.tableName}'>
+			<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageFieldsStructure&${tableParameter}' buttonIcon='arrow-left' title='#i18n{portal.util.labelBack}' color='light' />
+		</@pageHeader>
+		</#outputformat>
+		<@tform method='post' name='modify_field' action='jsp/admin/plugins/adminsql/ManageDatabases.jsp' type='horizontal' boxed=true>
+			<@input type='hidden' name='action' value='modifyFieldStructure' />
+			<@input type='hidden' name='pool_name' value=pool_name />
+			<@input type='hidden' name='table_name' value=sql_table.tableName />
+			<@input type='hidden' name='fieldToModify' value=field.fieldName! />
+			<@input type='hidden' name='idOldFieldKey' value=field.idKeyValue?c />
+			<@formGroup labelFor='field_name' labelKey='#i18n{adminsql.modify_field_structure.columnField}' mandatory=true>
+				<@input type='text' name='field_name' id='field_name' value=field.fieldName! maxlength=64 mandatory=true />
+			</@formGroup>
+			<@formGroup labelFor='field_type_id' labelKey='#i18n{adminsql.modify_field_structure.columnType}' mandatory=true>
+				<@select name='field_type_id' id='field_type_id' items=field_type_list default_value=field.idTypeValue?c />
+			</@formGroup>
+			<@formGroup labelFor='field_length_type' labelKey='#i18n{adminsql.create_field.labelLength}' helpKey='#i18n{adminsql.create_field.labelLength.help}'>
+				<@input type='text' name='field_length_type' id='field_length_type' value=field.lengthTypeValue! maxlength=20 />
+			</@formGroup>
+			<@formGroup labelFor='field_null_id' labelKey='#i18n{adminsql.modify_field_structure.columnNull}'>
+				<@select name='field_null_id' id='field_null_id' items=field_null_list default_value=field.idNullValue?c />
+			</@formGroup>
+			<@formGroup labelFor='field_key_id' labelKey='#i18n{adminsql.modify_field_structure.columnKey}'>
+				<@select name='field_key_id' id='field_key_id' items=field_key_list default_value=field.idKeyValue?c />
+			</@formGroup>
+			<#if field.idNullValue == 1 && field.idKeyValue != 2>
+			<@formGroup labelFor='field_default_value' labelKey='#i18n{adminsql.modify_field_structure.columnDefault}'>
+				<@input type='text' name='field_default_value' id='field_default_value' value=field.defaultValue! maxlength=50 />
+			</@formGroup>
+			</#if>
+			<@formGroup>
+				<@button type='submit' buttonIcon='check' title='#i18n{adminsql.modify_field_structure.savefieldstructure}' color='primary' />
+				<@aButton href='jsp/admin/plugins/adminsql/ManageDatabases.jsp?view=manageFieldsStructure&${tableParameter}' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
+			</@formGroup>
+		</@tform>
+	</@pageColumn>
+</@pageContainer>
